@@ -1,0 +1,9 @@
+# Encrypted data for DEV environment
+
+# Salesforce connector data
+sf:
+  consumerKey: "![wTKVPsoxEAwKpRNTQOt0iq9DOyccG6fzKkpBqYYQAzkvPfCSzS+bOrahcmR6JbJjBQ3G+0QwA67gjC9Pv7HOJGZBwtZp3baDoKUAatrwgba1gH8GTpZs9A==]"
+  consumerSecret: "![nRgeT3oT6TASAndhw0edNdrvCvS8ygsxYkWyMdcDTJDMa4VSw0X5HIRKXwt/Nfyad2f+aNo/g5pkYwj8rfjZCQYiWwGyV/Dg]"
+  username: "![oATX15NQkFVSP/Vu/0ZLcU4uM99xtOqUz9gIfbBRL60=]"
+  password: "![sqfylPkIOJnMrAOhyvsBAQ==]"
+  securityToken: "![6DgxkmnoQKnFZb8+iaoI4ZWEc8d3ZxDS1TP36UVglbI=]"

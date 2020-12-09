@@ -1,0 +1,11 @@
+# Contains Properties Independent from Environment
+
+# Mico Customer SAPI
+# resource::cd8b296d-8848-4a91-98ed-4a47f73703bd:mico-customer-sapi:1.0.4:raml:zip:mico-customer-sapi.raml
+
+api:
+  groupId: "${api.groupId}"
+  artifactId: "${api.artifactId}"
+  version: "${api.version}"
+  spec: "resource::${api.groupId}:${api.artifactId}:${api.version}:raml:zip:${api.artifactId}.raml"
+  majorVersion: "v1"

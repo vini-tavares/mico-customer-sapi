@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="Customer__cExample" format="json">
+      <types:shape format="weave" example="examples/Customer__cExample.json"><![CDATA[%dw 2.0
+
+type Customer__cExample = Array<{|  First_Name__c: String,   Name: Number {"typeId": "int"},   "type": String,   Phone_Number__c: String,   Last_Name__c: String,   Email__c: String,   Address__c: String|}> {"example": "[{\\\"First_Name__c\\\":\\\"Jose\\\",\\\"Name\\\":1,\\\"type\\\":\\\"Customer__c\\\",\\\"Phone_Number__c\\\":\\\"11922334455\\\",\\\"Last_Name__c\\\":\\\"Maia\\\",\\\"Email__c\\\":\\\"josemaia@gmail.com\\\",\\\"Address__c\\\":\\\"Rua Cardial Antonio, 65, Salto\\/SP, 12345-678, Brasil\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="CustomerRequestBodyExample" format="json">
+      <types:shape format="weave" example="examples/CustomerRequestBodyExample.json"><![CDATA[%dw 2.0
+
+type CustomerRequestBodyExample = {|
+  firstName: String, 
+  lastName: String, 
+  phoneNumber: String, 
+  email: String, 
+  address: {|
+    address1: String, 
+    city: String, 
+    zipCode: Number {"typeId": "int"}, 
+    country: String
+  |}
+|} {"example": "{\\\"firstName\\\":\\\"John\\\",\\\"lastName\\\":\\\"Doe\\\",\\\"phoneNumber\\\":\\\"123-123-1234\\\",\\\"email\\\":\\\"john.doe@gmail.com\\\",\\\"address\\\":{\\\"address1\\\":\\\"1234 Main Street\\\",\\\"city\\\":\\\"San Jose\\\",\\\"zipCode\\\":12345,\\\"country\\\":\\\"US\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="CustomerResponseBodyExample" format="json">
+      <types:shape format="weave" example="examples/CustomerResponseBodyExample.json"><![CDATA[%dw 2.0
+
+type CustomerResponseBodyExample = Array<{|  customerId: Number {"typeId": "int"},   firstName: String,   lastName: String,   phoneNumber: String,   email: String,   address: String|}> {"example": "[{\\\"customerId\\\":1,\\\"firstName\\\":\\\"John\\\",\\\"lastName\\\":\\\"Doe\\\",\\\"phoneNumber\\\":\\\"123-123-1234\\\",\\\"email\\\":\\\"john.doe@gmail.com\\\",\\\"address\\\":\\\"1234 Main Street, San Jose, 12345, US\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="CustomerByIDResponseBodyExample" format="json">
+      <types:shape format="weave" example="examples/CustomerByIDResponseBodyExample.json"><![CDATA[%dw 2.0
+
+type CustomerByIDResponseBodyExample = {|
+  customerId: Number {"typeId": "int"}, 
+  firstName: String, 
+  lastName: String, 
+  phoneNumber: String, 
+  email: String, 
+  address: String
+|} {"example": "{\\\"customerId\\\":1,\\\"firstName\\\":\\\"John\\\",\\\"lastName\\\":\\\"Doe\\\",\\\"phoneNumber\\\":\\\"123-123-1234\\\",\\\"email\\\":\\\"john.doe@gmail.com\\\",\\\"address\\\":\\\"1234 Main Street, San Jose, 12345, US\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="CustomerPostResponseBodyExample" format="json">
+      <types:shape format="weave" example="examples/CustomerPostResponseBodyExample-1.json"><![CDATA[%dw 2.0
+
+type CustomerPostResponseBodyExample = {|
+  salesforceId: String, 
+  customerId: Number {"typeId": "int"}
+|} {"example": "{\\\"salesforceId\\\":\\\"a001B00000cD2efGHI\\\",\\\"customerId\\\":1}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#3e8dda58-9019-4794-a554-340e72d741a7">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="CustomerResponseBodyExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#97a27ae2-c6fc-45e2-b19b-b35d7e3a7bf7">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="CustomerRequestBodyExample"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#499c4c17-9a61-45bc-818b-32a5d08918a7">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="CustomerByIDResponseBodyExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#80be653d-e8a1-4838-b4ce-deebc10f1cd0">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#7c52f81f-faab-466c-8eb6-c7bd6cc87e47">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#af0ffcc2-11d0-440a-a671-edab8c1ca41f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#3eac1571-9059-4f98-bc3e-e319d2d08444">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Customer__cExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#4e49ee53-a58a-4631-9316-1b2162b4bc5f">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="CustomerPostResponseBodyExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd 
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+
+	<http:listener-config name="apiHttpListenerConfig">
+		<http:listener-connection
+			host="${http.host}"
+			port="${http.port}" />
+	</http:listener-config>
+
+	<apikit:config
+		name="mico-customer-sapi-config"
+		api="${api.spec}"
+		outboundHeadersMapName="outboundHeaders"
+		httpStatusVarName="httpStatus" />
+
+	<salesforce:sfdc-config
+		name="salesforceConfig"
+		doc:name="Salesforce Config"
+		doc:id="2efa0268-d6fb-472b-961c-1bfba2cf6d02">
+		<salesforce:oauth-user-pass-connection
+			consumerKey="${secure::sf.consumerKey}"
+			consumerSecret="${secure::sf.consumerSecret}"
+			username="${secure::sf.username}"
+			password="${secure::sf.password}"
+			securityToken="${secure::sf.securityToken}" />
+	</salesforce:sfdc-config>
+
+	<configuration-properties
+		doc:name="configurationProperties"
+		doc:id="c15ab5f9-ea77-41d8-869b-2d1c8e0c4cd7"
+		file="properties.yaml" />
+
+	<configuration-properties
+		doc:name="env-dependentConfigurationProperties"
+		doc:id="8ec20cc4-3924-44e4-a165-3f9af825e7cf"
+		file="properties-${env}.yaml" />
+
+	<secure-properties:config
+		name="Secure_Properties_Config"
+		doc:name="Secure Properties Config"
+		doc:id="7a0250ac-ee40-4340-8a20-6fec1bf9de38"
+		file="properties-${env}-secure.yaml"
+		key="${encrypt.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+
+	<global-property
+		doc:name="Global Property"
+		doc:id="66041d12-1b8a-4428-92d9-b3ed7ac322bc"
+		name="env"
+		value="dev" />
+
+	<validation:config
+		name="validationConfig"
+		doc:name="Validation Config"
+		doc:id="53afd419-19b8-4d6f-84c2-8775cb1eb104" />
+
+	<http:request-config
+		name="httpRequestConfiguration"
+		basePath="/api/${api.majorVersion}">
+		<http:request-connection
+			host="${http.host}"
+			port="${http.port}" />
+	</http:request-config>
+	
+</mule>

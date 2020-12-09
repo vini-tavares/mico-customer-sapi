@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	
+	
+	<flow
+		name="getCustomerFlow"
+		doc:id="6f327fe6-b84d-4550-86f1-9f13ef969528">
+		<salesforce:query
+			doc:name="Get Customers"
+			doc:id="3eac1571-9059-4f98-bc3e-e319d2d08444"
+			config-ref="salesforceConfig">
+			<salesforce:salesforce-query><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<validation:is-not-null
+			doc:name="Check if returned payload is not null"
+			doc:id="af0ffcc2-11d0-440a-a671-edab8c1ca41f"
+			config-ref="validationConfig"
+			value="#[payload.Name]"
+			message='#["Get customer returned empty!"]'>
+			<error-mapping
+				sourceType="VALIDATION:NULL"
+				targetType="APP:NULL" />
+		</validation:is-not-null>
+		<ee:transform
+			doc:name="Transform to JSON Array"
+			doc:id="3e8dda58-9019-4794-a554-340e72d741a7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Strings
+output application/json
+---
+payload orderBy($.Name) map () -> {
+	customerId: $.Name,
+	firstName: capitalize($.First_Name__c),
+	lastName: capitalize($.Last_Name__c),
+	phoneNumber: $.Phone_Number__c,
+	email: $.Email__c,
+	address:{
+		address1: substringBeforeLast(substringBeforeLast(substringBeforeLast($.Address__c, ","), ","), ","),
+		city: substringAfterLast(substringBeforeLast(substringBeforeLast($.Address__c, ","), ","), ",")[1 to -1],
+		zipCode: substringAfterLast(substringBeforeLast($.Address__c, ","), ",")[1 to -1],
+		country: substringAfterLast($.Address__c, ",")[1 to -1]
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger
+			level="INFO"
+			doc:name="Payload"
+			doc:id="67dfdced-64af-4af9-aad6-ae43e4eccd84"
+			message="#[payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1d5371e9-b512-4483-926e-72c86617b85c" type="SALESFORCE:CONNECTIVITY, SALESFORCE:INVALID_INPUT, SALESFORCE:INVALID_RESPONSE, SALESFORCE:LIMIT_EXCEEDED, SALESFORCE:MUTUAL_AUTHENTICATION_FAILED, SALESFORCE:TIMEOUT, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED" >
+				<ee:transform doc:name="Transform Message" doc:id="f0330609-a352-4e94-9e73-db5cbd9ee2f4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Server side error!",
+	"description": error.description
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	
+	
+	
+</flow>
+	<flow name="getCustomerByIdFlow" doc:id="f667b106-dc9e-4775-9d15-52d33c5a0eee" >
+		<validation:is-number numberType="INTEGER" doc:name="Check if uriParam is number" doc:id="a606e4da-fcc6-42b1-803c-0952382ef764" config-ref="validationConfig" value="#[message.attributes.uriParams.customerId]" message='#["uriParam is not number!"]'>
+			<error-mapping sourceType="VALIDATION:INVALID_NUMBER" targetType="APP:URIPARAM" />
+		</validation:is-number>
+		<salesforce:query doc:name="Get Customer By Id" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
+			<salesforce:salesforce-query ><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c WHERE Name=:id']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.customerId as String]]]></salesforce:parameters>
+		</salesforce:query>
+		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="7c52f81f-faab-466c-8eb6-c7bd6cc87e47" config-ref="validationConfig" value="#[payload.Name]" message='#["Get customer returned empty!"]'>
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
+		</validation:is-not-null>
+		<ee:transform doc:name="Transform to JSON Object" doc:id="499c4c17-9a61-45bc-818b-32a5d08918a7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Strings
+output application/json	
+---
+{(payload map () -> {
+	customerId: $.Name,
+	firstName: capitalize($.First_Name__c),
+	lastName: capitalize($.Last_Name__c),
+	phoneNumber: $.Phone_Number__c,
+	email: $.Email__c,
+	address:{
+		address1: substringBeforeLast(substringBeforeLast(substringBeforeLast($.Address__c, ","), ","), ","),
+		city: substringAfterLast(substringBeforeLast(substringBeforeLast($.Address__c, ","), ","), ",")[1 to -1],
+		zipCode: substringAfterLast(substringBeforeLast($.Address__c, ","), ",")[1 to -1],
+		country: substringAfterLast($.Address__c, ",")[1 to -1]
+	}
+})}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Payload" doc:id="8043b23d-6246-4f4a-a38b-63faf9e66636" message="#[payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c9ecd4e9-585e-4bc2-9a8b-72fcda8190eb" type="SALESFORCE:CONNECTIVITY, SALESFORCE:INVALID_INPUT, SALESFORCE:INVALID_RESPONSE, SALESFORCE:LIMIT_EXCEEDED, SALESFORCE:MUTUAL_AUTHENTICATION_FAILED, SALESFORCE:TIMEOUT, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED">
+				<ee:transform doc:name="Transform Message" doc:id="5317ded6-5871-4474-89a3-01da5badd3b0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Server side error!",
+	"description": error.description
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	
+	
+	<flow name="postCustomerFlow" doc:id="ce36b4e6-f17c-4717-a15a-86afd1848abf">
+		<set-variable value="#[message.payload]" doc:name="Save the original payload to vars.check" doc:id="57e0af50-3183-4416-b36a-2ac23c168fed" variableName="check" />
+		<flow-ref doc:name="checkIfCustomerExistsFlow" doc:id="f565d138-6a89-422a-a26f-ba4d52c122dc" name="checkIfCustomerExistsFlow"/>
+		<ee:transform doc:name="Transform to JAVA Array" doc:id="97a27ae2-c6fc-45e2-b19b-b35d7e3a7bf7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	"First_Name__c": message.payload.firstName,
+	"Last_Name__c": message.payload.lastName,
+	"Phone_Number__c": message.payload.phoneNumber,
+	"Email__c": message.payload.email,
+	"Address__c": message.payload.address.address1 as String ++ ", " ++ message.payload.address.city as String ++ ", " ++ message.payload.address.zipCode as String ++ ", " ++ message.payload.address.country as String
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Customer__c" doc:name="Create new record" doc:id="c3ff4fbb-67ab-4c1a-b3b6-85331515ac15" config-ref="salesforceConfig">
+		</salesforce:create>
+		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="aff88f78-239e-48ee-9bc2-cfecad5fb4b4" value="#[payload.items.id]" message='#["Customer not created!"]' config-ref="validationConfig">
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
+		</validation:is-not-null>
+		<flow-ref doc:name="returnCustomerIdFlow" doc:id="3d5bda35-646a-43a2-8623-75f659748e1b" name="returnCustomerIdFlow" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6f5d5f51-0e8e-4adb-87a7-9e6edb2c5adf" type="SALESFORCE:CONNECTIVITY, SALESFORCE:INVALID_INPUT, SALESFORCE:INVALID_RESPONSE, SALESFORCE:LIMIT_EXCEEDED, SALESFORCE:MUTUAL_AUTHENTICATION_FAILED, SALESFORCE:TIMEOUT, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED" >
+				<ee:transform doc:name="Transform Message" doc:id="b09af6e2-880a-4f9b-80f8-0a52556611b2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Server side error!",
+	"description": error.description
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	
+	
+	<flow name="checkIfCustomerExistsFlow" doc:id="a4ca9353-44e2-4ebb-a22b-e7f5dca98d22" >
+		<salesforce:query doc:name="Get Customer to check if it exists" doc:id="0bd906e7-d692-4cb2-a889-add22619247d" config-ref="salesforceConfig">
+			<salesforce:salesforce-query><![CDATA[SELECT Id,Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c WHERE (First_Name__c=':firstName' AND Last_Name__c=':lastName') OR (Email__c=':email') OR (Phone_Number__c=':phoneNumber')]]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[{
+	firstName: message.payload.firstName,
+	lastName: message.payload.lastName,
+	email: message.payload.email,
+	phoneNumber: message.payload.phoneNumber,
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<validation:is-null doc:name="Check if returned payload is null" doc:id="c75c6163-ddac-40a5-9fb2-b6e4843994a0" value="#[payload.Name]" message='#["Customer data already exists on Salesforce!"]'>
+			<error-mapping sourceType="VALIDATION:NOT_NULL" targetType="APP:CHECK" />
+		</validation:is-null>
+		<set-payload value="#[vars.check]" doc:name="Set the original payload back" doc:id="1ce7cd54-13ee-483c-b78b-344c4842b3d4" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d1859106-be35-4ceb-a6ac-422778a1e190" type="APP:CHECK">
+				<ee:transform doc:name="Transform Check Payload to JSON Object" doc:id="642362f7-dea4-4a83-a2df-d6552a2774d2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{(payload map () -> {
+	"Id": $.Id,
+	"Name": $.Name,
+	"First_Name__c": $.First_Name__c,
+	"Last_Name__c": $.Last_Name__c,
+	"Phone_Number__c": $.Phone_Number__c,
+	"Email__c": $.Email__c,
+	"Address__c": $.Address__c
+})}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<ee:transform doc:name="Fulfill Error Information and Details" doc:id="14d7eba6-f7ec-400a-b97e-c5e2df454c77">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Strings
+output application/json
+
+var fname__c = upper(payload.First_Name__c)
+var lname__c = upper(payload.Last_Name__c)
+var email__c = upper(payload.Email__c)
+var phoneNumber__c = upper(payload.Phone_Number__c)
+var address__c = upper(payload.Address__c)
+var addressJoin = vars.check.address.address1 as String ++ ", " ++ vars.check.address.city as String ++ ", " ++ vars.check.address.zipCode as String ++ ", " ++ vars.check.address.country as String
+
+fun checkName(firstName, lastName)=
+	if(fname__c == upper(firstName) and lname__c == upper(lastName))
+		"Customer data 'firstName': '" ++ (firstName as String) ++ "' already on Salesforce! " ++ "Customer data 'lastName': '" ++ (lastName as String) ++ "' already on Salesforce! "
+	else
+		""
+
+fun checkEmail(email)=
+	if(email__c == upper(email))
+		"Customer data 'email:' '" ++ (email as String) ++ "' already on Salesforce! "
+	else
+		""
+
+fun checkPhoneNumber(phoneNumber)=
+	if(phoneNumber__c == upper(phoneNumber))
+		"Customer data 'phoneNumber': '" ++ (phoneNumber as String) ++ "' already on Salesforce! "
+	else
+		""
+		
+fun checkAddress(address)=
+	if(address__c == upper(address))
+		"Customer data 'address': '" ++ (address as String) ++ "' already on Salesforce!"
+	else
+		""
+---
+{
+	"message": "Conflict",
+	"description": error.description,
+	"details": checkName(vars.check.firstName, vars.check.lastName) ++ checkEmail(vars.check.email) ++ checkPhoneNumber(vars.check.phoneNumber) ++ checkAddress(addressJoin),
+	"customerFound": {
+		salesforceId: payload.Id,
+		customerId: payload.Name,
+		firstName: capitalize(payload.First_Name__c),
+		lastName: capitalize(payload.Last_Name__c),
+		phoneNumber: payload.Phone_Number__c, 
+		email: payload.Email__c,
+		address: payload.Address__c
+	}
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[409]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="90a3196d-a2d0-4d12-b44d-f865df821eff" type="SALESFORCE:CONNECTIVITY, SALESFORCE:INVALID_INPUT, SALESFORCE:INVALID_RESPONSE, SALESFORCE:LIMIT_EXCEEDED, SALESFORCE:MUTUAL_AUTHENTICATION_FAILED, SALESFORCE:TIMEOUT, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED" >
+				<ee:transform doc:name="Transform Message" doc:id="8d3a1acf-8a0d-48c0-94d1-d3c18300c6d2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Server side error!",
+	"description": error.description
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	
+	
+	<sub-flow name="returnCustomerIdFlow" doc:id="5ab845d0-f27e-4508-844a-e3eab93c6a8d">
+		<salesforce:query doc:name="Return CustomerID" doc:id="ec92f939-4f30-4449-a68f-fd0960168503" config-ref="salesforceConfig">
+			<salesforce:salesforce-query><![CDATA[SELECT Id,Name FROM Customer__c WHERE Id =':id']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[{(payload.items.id map () -> {
+	id: $
+})}]]]></salesforce:parameters>
+		</salesforce:query>
+		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="e842b3fd-5114-478d-ae49-28799bc9b063" value="#[payload.Name]" message='#["CustomerID retrieve attempt not successful!"]'>
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
+		</validation:is-not-null>
+		<ee:transform doc:name="Transform to JSON Object" doc:id="4e49ee53-a58a-4631-9316-1b2162b4bc5f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{(payload map () -> {
+	"salesforceId": $.Id,
+	"customerId": $.Name
+})}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="outboundHeaders" ><![CDATA[{
+	"Location": "/customer/" ++ payload[0].Name as String
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Payload" doc:id="0805a464-0743-4a86-b549-7cb9d258ffa0" />
+	</sub-flow>	
+
+</mule>

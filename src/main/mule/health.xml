@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+
+	<flow
+		name="healthAliveFlow"
+		doc:id="bb8e7034-591c-49c2-a9cb-b4a614dc2214">
+		<ee:transform
+			doc:name="Alive"
+			doc:id="628c9ec4-1235-4280-b7bc-027b3d9ce318">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "ALIVE"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger
+			level="INFO"
+			doc:name="Payload"
+			doc:id="6e831f02-cff6-41c3-8137-a9e73682897d"
+			message="#[payload]" />
+	</flow>
+
+
+	<flow
+		name="healthReadyFlow"
+		doc:id="20c9505a-9edd-47cf-a468-5be67b72e9eb">
+		<salesforce:query
+			doc:name="Query for testing conn with SF"
+			doc:id="01228ca2-27a7-45a4-b5a3-38ff4ca766b3"
+			config-ref="salesforceConfig">
+			<error-mapping targetType="APP:READY" />
+			<salesforce:salesforce-query><![CDATA[SELECT Name FROM Customer__c LIMIT 5]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform
+			doc:name="Ready"
+			doc:id="7ea6b102-71eb-4288-98fd-3d579b07e0b4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "READY"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger
+			level="INFO"
+			doc:name="Payload"
+			doc:id="b4bde98b-c37b-428a-b717-748ebdeff258"
+			message="#[payload]" />
+		<error-handler>
+			<on-error-propagate
+				enableNotifications="true"
+				logException="true"
+				doc:name="On Error Propagate"
+				doc:id="afe064b5-feb6-4034-a352-be3902675842"
+				type="APP:READY">
+				<ee:transform
+					doc:name="Transform Message"
+					doc:id="7c66d411-142f-4d6b-bb1f-048ad14423fe">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "API is not READY!",
+	"description": error.description
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+
+</mule>
