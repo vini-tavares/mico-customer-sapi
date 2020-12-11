@@ -11,8 +11,8 @@
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
-	
-	
+
+
 	<flow
 		name="getCustomerFlow"
 		doc:id="6f327fe6-b84d-4550-86f1-9f13ef969528">
@@ -20,6 +20,7 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 			doc:name="Get Customers"
 			doc:id="3eac1571-9059-4f98-bc3e-e319d2d08444"
 			config-ref="salesforceConfig">
+			<error-mapping targetType="APP:SERVER" />
 			<salesforce:salesforce-query><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c]]></salesforce:salesforce-query>
 		</salesforce:query>
 		<validation:is-not-null
@@ -60,24 +61,6 @@ payload orderBy($.Name) map () -> {
 			doc:name="Payload"
 			doc:id="67dfdced-64af-4af9-aad6-ae43e4eccd84"
 			message="#[payload]" />
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1d5371e9-b512-4483-926e-72c86617b85c" type="SALESFORCE:CONNECTIVITY, SALESFORCE:INVALID_INPUT, SALESFORCE:INVALID_RESPONSE, SALESFORCE:LIMIT_EXCEEDED, SALESFORCE:MUTUAL_AUTHENTICATION_FAILED, SALESFORCE:TIMEOUT, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED" >
-				<ee:transform doc:name="Transform Message" doc:id="f0330609-a352-4e94-9e73-db5cbd9ee2f4" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"message": "Server side error!",
-	"description": error.description
-}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-		</error-handler>
 	
 	
 	
@@ -87,6 +70,7 @@ output application/json
 			<error-mapping sourceType="VALIDATION:INVALID_NUMBER" targetType="APP:URIPARAM" />
 		</validation:is-number>
 		<salesforce:query doc:name="Get Customer By Id" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
+			<error-mapping targetType="APP:SERVER" />
 			<salesforce:salesforce-query ><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c WHERE Name=:id']]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.customerId as String]]]></salesforce:parameters>
 		</salesforce:query>
@@ -115,24 +99,6 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Payload" doc:id="8043b23d-6246-4f4a-a38b-63faf9e66636" message="#[payload]" />
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c9ecd4e9-585e-4bc2-9a8b-72fcda8190eb" type="SALESFORCE:CONNECTIVITY, SALESFORCE:INVALID_INPUT, SALESFORCE:INVALID_RESPONSE, SALESFORCE:LIMIT_EXCEEDED, SALESFORCE:MUTUAL_AUTHENTICATION_FAILED, SALESFORCE:TIMEOUT, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED">
-				<ee:transform doc:name="Transform Message" doc:id="5317ded6-5871-4474-89a3-01da5badd3b0" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"message": "Server side error!",
-	"description": error.description
-}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-		</error-handler>
 	</flow>
 	
 	
@@ -155,35 +121,19 @@ output application/java
 			</ee:message>
 		</ee:transform>
 		<salesforce:create type="Customer__c" doc:name="Create new record" doc:id="c3ff4fbb-67ab-4c1a-b3b6-85331515ac15" config-ref="salesforceConfig">
+			<error-mapping targetType="APP:SERVER" />
 		</salesforce:create>
 		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="aff88f78-239e-48ee-9bc2-cfecad5fb4b4" value="#[payload.items.id]" message='#["Customer not created!"]' config-ref="validationConfig">
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
 		</validation:is-not-null>
-		<flow-ref doc:name="returnCustomerIdFlow" doc:id="3d5bda35-646a-43a2-8623-75f659748e1b" name="returnCustomerIdFlow" />
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6f5d5f51-0e8e-4adb-87a7-9e6edb2c5adf" type="SALESFORCE:CONNECTIVITY, SALESFORCE:INVALID_INPUT, SALESFORCE:INVALID_RESPONSE, SALESFORCE:LIMIT_EXCEEDED, SALESFORCE:MUTUAL_AUTHENTICATION_FAILED, SALESFORCE:TIMEOUT, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED" >
-				<ee:transform doc:name="Transform Message" doc:id="b09af6e2-880a-4f9b-80f8-0a52556611b2" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"message": "Server side error!",
-	"description": error.description
-}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-		</error-handler>
+		<flow-ref doc:name="returnCustomerIdFlow" doc:id="f1674ddd-3523-4cc3-af53-fc46d7da2b8d" name="returnCustomerIdFlow"/>
 	</flow>
 	
 	
 	
 	<flow name="checkIfCustomerExistsFlow" doc:id="a4ca9353-44e2-4ebb-a22b-e7f5dca98d22" >
 		<salesforce:query doc:name="Get Customer to check if it exists" doc:id="0bd906e7-d692-4cb2-a889-add22619247d" config-ref="salesforceConfig">
+			<error-mapping targetType="APP:SERVER" />
 			<salesforce:salesforce-query><![CDATA[SELECT Id,Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c WHERE (First_Name__c=':firstName' AND Last_Name__c=':lastName') OR (Email__c=':email') OR (Phone_Number__c=':phoneNumber')]]></salesforce:salesforce-query>
 			<salesforce:parameters><![CDATA[#[{
 	firstName: message.payload.firstName,
@@ -203,7 +153,7 @@ output application/json
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-{(payload map () -> {
+{(message.payload map () -> {
 	"Id": $.Id,
 	"Name": $.Name,
 	"First_Name__c": $.First_Name__c,
@@ -271,45 +221,29 @@ fun checkAddress(address)=
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="90a3196d-a2d0-4d12-b44d-f865df821eff" type="SALESFORCE:CONNECTIVITY, SALESFORCE:INVALID_INPUT, SALESFORCE:INVALID_RESPONSE, SALESFORCE:LIMIT_EXCEEDED, SALESFORCE:MUTUAL_AUTHENTICATION_FAILED, SALESFORCE:TIMEOUT, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED" >
-				<ee:transform doc:name="Transform Message" doc:id="8d3a1acf-8a0d-48c0-94d1-d3c18300c6d2" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"message": "Server side error!",
-	"description": error.description
-}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
 		</error-handler>
-	</flow>
+	</flow>	
 	
 	
 	
-	<sub-flow name="returnCustomerIdFlow" doc:id="5ab845d0-f27e-4508-844a-e3eab93c6a8d">
-		<salesforce:query doc:name="Return CustomerID" doc:id="ec92f939-4f30-4449-a68f-fd0960168503" config-ref="salesforceConfig">
+	<sub-flow name="returnCustomerIdFlow" doc:id="5c307103-9380-4ca4-83f8-a756e93fc4b7">
+		<salesforce:query doc:name="Return CustomerID" doc:id="9c648674-10c2-430d-a622-df24ec78b325" config-ref="salesforceConfig">
+			<error-mapping targetType="APP:SERVER" />
 			<salesforce:salesforce-query><![CDATA[SELECT Id,Name FROM Customer__c WHERE Id =':id']]></salesforce:salesforce-query>
 			<salesforce:parameters><![CDATA[#[{(payload.items.id map () -> {
 	id: $
 })}]]]></salesforce:parameters>
 		</salesforce:query>
-		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="e842b3fd-5114-478d-ae49-28799bc9b063" value="#[payload.Name]" message='#["CustomerID retrieve attempt not successful!"]'>
+		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="e878f7af-30cb-42e6-a9f7-eaf286a1fd7f" value="#[payload.Name]" message='#["CustomerID retrieve attempt not successful!"]'>
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
 		</validation:is-not-null>
-		<ee:transform doc:name="Transform to JSON Object" doc:id="4e49ee53-a58a-4631-9316-1b2162b4bc5f">
+		<ee:transform doc:name="Transform to JSON Object" doc:id="0a2af384-85cd-4db4-801f-20a6fd754e1e">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {(payload map () -> {
-	"salesforceId": $.Id,
-	"customerId": $.Name
+	"salesforceId": $.Id
 })}]]></ee:set-payload>
 			</ee:message>
 			<ee:variables >
@@ -318,7 +252,7 @@ output application/json
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Payload" doc:id="0805a464-0743-4a86-b549-7cb9d258ffa0" />
-	</sub-flow>	
+		<logger level="INFO" doc:name="Payload" doc:id="6d7e70c8-afea-4eb6-88e6-f0302d9fe844" message="#[payload]"/>
+	</sub-flow>
 
 </mule>

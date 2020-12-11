@@ -26,9 +26,8 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 
 	<apikit:config
 		name="mico-customer-sapi-config"
-		api="${api.spec}"
 		outboundHeadersMapName="outboundHeaders"
-		httpStatusVarName="httpStatus" />
+		httpStatusVarName="httpStatus" api="${api.spec}"/>
 
 	<salesforce:sfdc-config
 		name="salesforceConfig"
@@ -79,5 +78,6 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 			host="${http.host}"
 			port="${http.port}" />
 	</http:request-config>
+	<global-property doc:name="Global Property" doc:id="56fc3225-03bd-4cda-8799-37e1709e809d" name="encrypt.key" value="secure12345" />
 	
 </mule>

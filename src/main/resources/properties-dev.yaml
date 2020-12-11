@@ -3,7 +3,7 @@
 # HTTP Properties
 http:
   host: "0.0.0.0"
-  port: "8081"
+  port: "8082"
   
 # API Autodiscovery Properties
 api:

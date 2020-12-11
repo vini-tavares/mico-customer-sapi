@@ -294,16 +294,10 @@ payload]"
 				doc:name="Mock when"
 				doc:id="4580ad38-39f5-445f-bff3-91e9ca593405"
 				processor="salesforce:query">
-				<munit-tools:with-attributes>
-					<munit-tools:with-attribute
-						whereValue="Query for testing conn with SF"
-						attributeName="doc:name" />
-					<munit-tools:with-attribute
-						whereValue="e39082c8-d3dd-4b06-a7ed-84af0bfd0cdf"
-						attributeName="doc:id" />
-					<munit-tools:with-attribute
-						whereValue="salesforceConfig"
-						attributeName="config-ref" />
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Query for testing conn with SF" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="01228ca2-27a7-45a4-b5a3-38ff4ca766b3" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="salesforceConfig" attributeName="config-ref" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return>
 					<munit-tools:payload
@@ -321,23 +315,6 @@ payload]"
 			</http:request>
 		</munit:execution>
 		<munit:validation>
-			<munit-tools:verify-call
-				doc:name="Verify call"
-				doc:id="c04d1aa4-b98c-4b8a-8b2f-8b5587ca9364"
-				processor="salesforce:query"
-				times="#[1]">
-				<munit-tools:with-attributes>
-					<munit-tools:with-attribute
-						whereValue="Query for testing conn with SF"
-						attributeName="doc:name" />
-					<munit-tools:with-attribute
-						whereValue="e39082c8-d3dd-4b06-a7ed-84af0bfd0cdf"
-						attributeName="doc:id" />
-					<munit-tools:with-attribute
-						whereValue="salesforceConfig"
-						attributeName="config-ref" />
-				</munit-tools:with-attributes>
-			</munit-tools:verify-call>
 			<munit-tools:assert-that
 				expression="#[attributes.statusCode]"
 				is="#[MunitTools::equalTo(200)]"
@@ -367,7 +344,7 @@ payload]"
 			<munit-tools:mock-when doc:name="Mock when" doc:id="decc34b7-e833-49b2-91fb-ed98ce7dcf89" processor="salesforce:query" >
 				<munit-tools:with-attributes >
 					<munit-tools:with-attribute whereValue="Query for testing conn with SF" attributeName="doc:name" />
-					<munit-tools:with-attribute whereValue="e39082c8-d3dd-4b06-a7ed-84af0bfd0cdf" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="01228ca2-27a7-45a4-b5a3-38ff4ca766b3" attributeName="doc:id" />
 					<munit-tools:with-attribute whereValue="salesforceConfig" attributeName="config-ref" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
@@ -384,6 +361,13 @@ payload]"
 			</http:request>
 		</munit:execution>
 		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="413b3b27-e5cb-4351-8f6a-a9417dcf1c95" processor="salesforce:query" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Query for testing conn with SF" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="01228ca2-27a7-45a4-b5a3-38ff4ca766b3" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="salesforceConfig" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
 			<munit-tools:assert-that doc:name="Assert That Status Code is 500" doc:id="1c651ed3-ac57-4ade-9210-086ad00562e0" message="The HTTP Status code is not correct!" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(500)]" />
 			<munit-tools:assert-that doc:name="Assert That - Payload is Expected" doc:id="66de9406-67f0-42fa-9948-a39311624e4f" message="The response payload is not correct!" expression="#[%dw 2.0
 output application/json
@@ -494,11 +478,11 @@ payload]"
 			<munit:enable-flow-source value="get:\customer:mico-customer-sapi-config" />
 		</munit:enable-flow-sources>
 		<munit:behavior >
-			<munit-tools:mock-when doc:name="Mock when" doc:id="66872235-ba50-4e79-bb54-46824a4a14fa" processor="salesforce:query">
+			<munit-tools:mock-when doc:name="Mock when" doc:id="66872235-ba50-4e79-bb54-46824a4a14fa" processor="flow-ref">
 				<munit-tools:with-attributes >
-					<munit-tools:with-attribute whereValue="Get Customers" attributeName="doc:name" />
-					<munit-tools:with-attribute whereValue="3eac1571-9059-4f98-bc3e-e319d2d08444" attributeName="doc:id" />
-					<munit-tools:with-attribute whereValue="salesforceConfig" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="getCustomerFlow" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="07423676-6d48-442e-9c2d-15c538b84dc5" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="getCustomerFlow" attributeName="name" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
 					<munit-tools:error typeId="#['APIKIT:BAD_REQUEST']" />
@@ -628,9 +612,9 @@ payload.message]"
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 			<munit-tools:mock-when doc:name="Return customer Id" doc:id="2b2d0c31-f6c1-4cc2-970d-be5e6d6f1722" processor="salesforce:query">
-				<munit-tools:with-attributes>
+				<munit-tools:with-attributes >
 					<munit-tools:with-attribute whereValue="Return CustomerID" attributeName="doc:name" />
-					<munit-tools:with-attribute whereValue="ec92f939-4f30-4449-a68f-fd0960168503" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="9c648674-10c2-430d-a622-df24ec78b325" attributeName="doc:id" />
 					<munit-tools:with-attribute whereValue="salesforceConfig" attributeName="config-ref" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return>
@@ -898,7 +882,7 @@ payload.message]" is='#[MunitTools::equalTo("Server side error!")]' />
 			<munit-tools:mock-when doc:name="Return customer id" doc:id="6c581c62-5f04-4c84-bfd5-b0abbc7797ba" processor="salesforce:query" >
 				<munit-tools:with-attributes >
 					<munit-tools:with-attribute whereValue="Return CustomerID" attributeName="doc:name" />
-					<munit-tools:with-attribute whereValue="ec92f939-4f30-4449-a68f-fd0960168503" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="9c648674-10c2-430d-a622-df24ec78b325" attributeName="doc:id" />
 					<munit-tools:with-attribute whereValue="salesforceConfig" attributeName="config-ref" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
