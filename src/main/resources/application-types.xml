@@ -72,20 +72,6 @@ type CustomerPostResponseBodyExample = {|
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#97a27ae2-c6fc-45e2-b19b-b35d7e3a7bf7">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="CustomerRequestBodyExample"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="Customer__cExample"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
   <types:enrichment select="#499c4c17-9a61-45bc-818b-32a5d08918a7">
     <types:processor-declaration>
       <types:input-event>
@@ -155,4 +141,5 @@ type CustomerPostResponseBodyExample = {|
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#67d50957-fadf-4988-93c8-469ce0e15e32"/>
 </types:mule>

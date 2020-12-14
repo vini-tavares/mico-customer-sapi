@@ -1,1 +1,1 @@
-{"message":"Bad request","description": "uriParam is not number!"}
+{"errorMessage":"Bad request","description": "uriParam is not number!"}

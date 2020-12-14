@@ -30,7 +30,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 output application/json
 ---
 {
-	"message": "Bad request",
+	"errorMessage": "Bad request",
 	"description": error.description
 }]]></ee:set-payload>
 					</ee:message>
@@ -48,8 +48,8 @@ output application/json
 output application/json
 ---
 {
-	"message": "Resource not found",
-	"description": error.description as String
+	"errorMessage": "Resource not found",
+	"description": error.description
 }]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
@@ -65,10 +65,13 @@ output application/json
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Method not allowed"}]]></ee:set-payload>
+{
+	"errorMessage": "Method not allowed",
+	"description": error.description
+}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus">405</ee:set-variable>
+						<ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
@@ -80,10 +83,13 @@ output application/json
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Not acceptable"}]]></ee:set-payload>
+{
+	"errorMessage": "Not acceptable",
+	"description": error.description
+}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus">406</ee:set-variable>
+						<ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
@@ -95,10 +101,13 @@ output application/json
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Unsupported media type"}]]></ee:set-payload>
+{
+	"errorMessage": "Unsupported media type",
+	"description": error.description
+}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus">415</ee:set-variable>
+						<ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
@@ -110,10 +119,13 @@ output application/json
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Not Implemented"}]]></ee:set-payload>
+{
+	"errorMessage": "Not Implemented",
+	"description": error.description
+}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus">501</ee:set-variable>
+						<ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
@@ -124,7 +136,7 @@ output application/json
 output application/json
 ---
 {
-	"message": "Server side error!",
+	"errorMessage": "Server side error!",
 	"description": error.description
 }]]></ee:set-payload>
 					</ee:message>
@@ -160,10 +172,13 @@ output application/json
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Resource not found"}]]></ee:set-payload>
+{
+	"errorMessage": "Resource not found",
+	"description": error.description
+}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus">404</ee:set-variable>
+						<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
@@ -178,7 +193,7 @@ output application/json
 
 
 
-	<flow name="get:\customer:mico-customer-sapi-config">
+	<flow name="get:\customers:mico-customer-sapi-config">
 		<flow-ref doc:name="getCustomerFlow" doc:id="07423676-6d48-442e-9c2d-15c538b84dc5" name="getCustomerFlow"/>
 	</flow>
 
@@ -190,13 +205,13 @@ output application/json
 
 
 
-	<flow name="get:\customer\(customerId):mico-customer-sapi-config">
+	<flow name="get:\customers\(customerId):mico-customer-sapi-config">
 		<flow-ref doc:name="getCustomerByIdFlow" doc:id="8b53776b-8cf1-41e4-a182-ba632601128d" name="getCustomerByIdFlow"/>
 	</flow>
 
 
 
-	<flow name="post:\customer:application\json:mico-customer-sapi-config">
+	<flow name="post:\customers:application\json:mico-customer-sapi-config">
 		<flow-ref doc:name="postCustomerFlow" doc:id="dcf6115f-4aae-4f22-a1c9-2f969d1044bc" name="postCustomerFlow"/>
 	</flow>
 

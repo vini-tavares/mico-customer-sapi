@@ -21,8 +21,17 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 			doc:id="3eac1571-9059-4f98-bc3e-e319d2d08444"
 			config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
-			<salesforce:salesforce-query><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c]]></salesforce:salesforce-query>
-		</salesforce:query>
+			<reconnect />
+			<salesforce:salesforce-query><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
+	   FROM Customer__c WHERE id >= :initial AND id <= :final]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/json
+---
+{
+	"initial": attributes.queryParams.'initialId' as Number,
+	"final": attributes.queryParams.'finalId' as Number
+}]]]></salesforce:parameters>
+		
+</salesforce:query>
 		<validation:is-not-null
 			doc:name="Check if returned payload is not null"
 			doc:id="af0ffcc2-11d0-440a-a671-edab8c1ca41f"
@@ -71,6 +80,7 @@ payload orderBy($.Name) map () -> {
 		</validation:is-number>
 		<salesforce:query doc:name="Get Customer By Id" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
+			<reconnect />
 			<salesforce:salesforce-query ><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c WHERE Name=:id']]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.customerId as String]]]></salesforce:parameters>
 		</salesforce:query>
@@ -106,27 +116,6 @@ output application/json
 	<flow name="postCustomerFlow" doc:id="ce36b4e6-f17c-4717-a15a-86afd1848abf">
 		<set-variable value="#[message.payload]" doc:name="Save the original payload to vars.check" doc:id="57e0af50-3183-4416-b36a-2ac23c168fed" variableName="check" />
 		<flow-ref doc:name="checkIfCustomerExistsFlow" doc:id="f565d138-6a89-422a-a26f-ba4d52c122dc" name="checkIfCustomerExistsFlow"/>
-		<ee:transform doc:name="Transform to JAVA Array" doc:id="97a27ae2-c6fc-45e2-b19b-b35d7e3a7bf7">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/java
----
-[{
-	"First_Name__c": message.payload.firstName,
-	"Last_Name__c": message.payload.lastName,
-	"Phone_Number__c": message.payload.phoneNumber,
-	"Email__c": message.payload.email,
-	"Address__c": message.payload.address.address1 as String ++ ", " ++ message.payload.address.city as String ++ ", " ++ message.payload.address.zipCode as String ++ ", " ++ message.payload.address.country as String
-}]]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<salesforce:create type="Customer__c" doc:name="Create new record" doc:id="c3ff4fbb-67ab-4c1a-b3b6-85331515ac15" config-ref="salesforceConfig">
-			<error-mapping targetType="APP:SERVER" />
-		</salesforce:create>
-		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="aff88f78-239e-48ee-9bc2-cfecad5fb4b4" value="#[payload.items.id]" message='#["Customer not created!"]' config-ref="validationConfig">
-			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
-		</validation:is-not-null>
-		<flow-ref doc:name="returnCustomerIdFlow" doc:id="f1674ddd-3523-4cc3-af53-fc46d7da2b8d" name="returnCustomerIdFlow"/>
 	</flow>
 	
 	
@@ -134,7 +123,11 @@ output application/java
 	<flow name="checkIfCustomerExistsFlow" doc:id="a4ca9353-44e2-4ebb-a22b-e7f5dca98d22" >
 		<salesforce:query doc:name="Get Customer to check if it exists" doc:id="0bd906e7-d692-4cb2-a889-add22619247d" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
-			<salesforce:salesforce-query><![CDATA[SELECT Id,Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c WHERE (First_Name__c=':firstName' AND Last_Name__c=':lastName') OR (Email__c=':email') OR (Phone_Number__c=':phoneNumber')]]></salesforce:salesforce-query>
+			<reconnect />
+			<salesforce:salesforce-query><![CDATA[SELECT Id,Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,
+	   Address__c FROM Customer__c WHERE (First_Name__c=':firstName' 
+	   AND Last_Name__c=':lastName') OR (Email__c=':email') OR 
+	   (Phone_Number__c=':phoneNumber')]]></salesforce:salesforce-query>
 			<salesforce:parameters><![CDATA[#[{
 	firstName: message.payload.firstName,
 	lastName: message.payload.lastName,
@@ -142,12 +135,67 @@ output application/java
 	phoneNumber: message.payload.phoneNumber,
 }]]]></salesforce:parameters>
 		</salesforce:query>
-		<validation:is-null doc:name="Check if returned payload is null" doc:id="c75c6163-ddac-40a5-9fb2-b6e4843994a0" value="#[payload.Name]" message='#["Customer data already exists on Salesforce!"]'>
-			<error-mapping sourceType="VALIDATION:NOT_NULL" targetType="APP:CHECK" />
-		</validation:is-null>
-		<set-payload value="#[vars.check]" doc:name="Set the original payload back" doc:id="1ce7cd54-13ee-483c-b78b-344c4842b3d4" />
+		<logger level="INFO" doc:name="Logger" doc:id="af683e84-e372-46e6-bdbf-4656887a1bea" message="#[%dw 2.0
+output application/json
+---
+payload]"/>
+		<choice doc:name="Choice" doc:id="cf499e02-b6f3-4b96-89de-29cdc47020a6">
+			<when expression="#[payload.Name != null]">
+				<foreach doc:name="For Each" doc:id="2e65c179-3a2e-42fa-91a7-537940e9158f" >
+					<choice doc:name="Choice" doc:id="68a6792a-4d89-45c2-8724-bd3c2d95d1d4">
+					<when expression="#[(upper(payload.First_Name__c as String) == upper(vars.check.firstName) and upper(payload.Last_Name__c as String) == upper(vars.check.lastName)) and upper(payload.Email__c as String) == upper(vars.check.email) and upper(payload.Phone_Number__c as String) == upper(vars.check.phoneNumber)]">
+						<ee:transform doc:name="Transform to JSON Object" doc:id="67d50957-fadf-4988-93c8-469ce0e15e32">
+							<ee:message>
+							</ee:message>
+							<ee:variables>
+								<ee:set-variable variableName="outboundHeaders"><![CDATA[{
+	"Location": "/customer/" ++ payload.Name as String
+}]]></ee:set-variable>
+									<ee:set-variable variableName="checkResult" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"salesforceId": payload.Id
+}]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</when>
+						<when expression="#[vars.checkResult == null and (upper(payload.First_Name__c as String) == upper(vars.check.firstName) and upper(payload.Last_Name__c as String) == upper(vars.check.lastName)) and upper(payload.Email__c as String) != upper(vars.check.email) and upper(payload.Phone_Number__c as String) != upper(vars.check.phoneNumber)]">
+							<set-variable value='#["Create"]' doc:name="checkResult" doc:id="01c8c0c8-48d7-4f67-b28f-d11a28dd4c0f" variableName="checkResult"/>
+						</when>
+				</choice>
+				</foreach>
+				<validation:is-not-null doc:name="Is not null" doc:id="a0c1a13c-320a-45e5-854f-e76df54133eb" config-ref="validationConfig" value="#[vars.checkResult]">
+					<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CHECK" />
+				</validation:is-not-null>
+				<choice doc:name="Choice" doc:id="800e4941-6e58-4145-87d7-2cfd766766b8">
+					<when expression='#[vars.checkResult == "Create"]'>
+						<set-payload value="#[vars.check]" doc:name="Set the original payload back" doc:id="7edabfab-850e-4aaf-beb5-c02164430f7a" />
+						<flow-ref doc:name="createCustomerFlow" doc:id="115518e3-959d-4e8a-8219-5e5a152557ab" name="createCustomerFlow" />
+					</when>
+					<otherwise >
+						<ee:transform doc:name="Transform Message" doc:id="0c40cbaf-ce0c-4761-83b1-32ca4a0e9df0">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.checkResult]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<set-payload value="#[vars.check]" doc:name="Set the original payload back" doc:id="1ce7cd54-13ee-483c-b78b-344c4842b3d4" />
+				<flow-ref doc:name="createCustomerFlow" doc:id="9fd928a1-4cac-42c3-8db1-febdf6d2610e" name="createCustomerFlow"/>
+			</otherwise>
+		</choice>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d1859106-be35-4ceb-a6ac-422778a1e190" type="APP:CHECK">
+				<logger level="INFO" doc:name="Logger" doc:id="dc24150a-5a14-4d3f-8438-29d65371939c" message="#[%dw 2.0
+output application/json
+---
+payload]"/>
 				<ee:transform doc:name="Transform Check Payload to JSON Object" doc:id="642362f7-dea4-4a83-a2df-d6552a2774d2" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -164,6 +212,7 @@ output application/json
 })}]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="0339c518-81db-4e33-ad0c-73e22ab040e1" message="#[payload]"/>
 				<ee:transform doc:name="Fulfill Error Information and Details" doc:id="14d7eba6-f7ec-400a-b97e-c5e2df454c77">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -202,7 +251,7 @@ fun checkAddress(address)=
 		""
 ---
 {
-	"message": "Conflict",
+	"errorMessage": "Conflict",
 	"description": error.description,
 	"details": checkName(vars.check.firstName, vars.check.lastName) ++ checkEmail(vars.check.email) ++ checkPhoneNumber(vars.check.phoneNumber) ++ checkAddress(addressJoin),
 	"customerFound": {
@@ -226,9 +275,34 @@ fun checkAddress(address)=
 	
 	
 	
+	<sub-flow name="createCustomerFlow" doc:id="7fa5524d-e404-4e8f-9d33-1bb62a1e4021" >
+		<ee:transform doc:name="Transform to JAVA Array" doc:id="2234c0df-5f73-4228-a0af-1e7e10ffca15" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	"First_Name__c": message.payload.firstName,
+	"Last_Name__c": message.payload.lastName,
+	"Phone_Number__c": message.payload.phoneNumber,
+	"Email__c": message.payload.email,
+	"Address__c": message.payload.address.address1 as String ++ ", " ++ message.payload.address.city as String ++ ", " ++ message.payload.address.zipCode as String ++ ", " ++ message.payload.address.country as String
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Customer__c" doc:name="Create new record" doc:id="244165fe-074e-49ec-a0eb-e4f536f40847" config-ref="salesforceConfig" >
+			<error-mapping targetType="APP:SERVER" />
+			<reconnect />
+		</salesforce:create>
+		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="159cd2a5-e773-4a69-a8f2-d4efc445069d" config-ref="validationConfig" value="#[payload.items.id]" message='#["Customer not created!"]' >
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
+		</validation:is-not-null>
+		<flow-ref doc:name="returnCustomerIdFlow" doc:id="ce9a6c63-e9aa-4bf8-bfb7-cc87d843bec5" name="returnCustomerIdFlow" />
+	</sub-flow>
 	<sub-flow name="returnCustomerIdFlow" doc:id="5c307103-9380-4ca4-83f8-a756e93fc4b7">
 		<salesforce:query doc:name="Return CustomerID" doc:id="9c648674-10c2-430d-a622-df24ec78b325" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
+			<reconnect />
 			<salesforce:salesforce-query><![CDATA[SELECT Id,Name FROM Customer__c WHERE Id =':id']]></salesforce:salesforce-query>
 			<salesforce:parameters><![CDATA[#[{(payload.items.id map () -> {
 	id: $

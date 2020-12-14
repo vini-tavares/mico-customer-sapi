@@ -75,7 +75,7 @@ output application/json
 output application/json
 ---
 {
-	"message": "API is not READY!",
+	"errorMessage": "API is not READY!",
 	"description": error.description
 }]]></ee:set-payload>
 					</ee:message>
