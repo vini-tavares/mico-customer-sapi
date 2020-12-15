@@ -22,8 +22,8 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 			config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
 			<reconnect />
-			<salesforce:salesforce-query><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
-	   FROM Customer__c WHERE id >= :initial AND id <= :final]]></salesforce:salesforce-query>
+			<salesforce:salesforce-query><![CDATA[SELECT CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
+FROM Customer__c WHERE CustomerId__c >= :initial AND CustomerId__c <= :final]]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[output application/json
 ---
 {
@@ -36,7 +36,7 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 			doc:name="Check if returned payload is not null"
 			doc:id="af0ffcc2-11d0-440a-a671-edab8c1ca41f"
 			config-ref="validationConfig"
-			value="#[payload.Name]"
+			value="#[payload[0].CustomerId__c]"
 			message='#["Get customer returned empty!"]'>
 			<error-mapping
 				sourceType="VALIDATION:NULL"
@@ -50,8 +50,8 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 import * from dw::core::Strings
 output application/json
 ---
-payload orderBy($.Name) map () -> {
-	customerId: $.Name,
+payload orderBy($.CustomerId__c) map () -> {
+	customerId: $.CustomerId__c as Number {format: "0"} as String,
 	firstName: capitalize($.First_Name__c),
 	lastName: capitalize($.Last_Name__c),
 	phoneNumber: $.Phone_Number__c,
@@ -81,10 +81,11 @@ payload orderBy($.Name) map () -> {
 		<salesforce:query doc:name="Get Customer By Id" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
 			<reconnect />
-			<salesforce:salesforce-query ><![CDATA[SELECT Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c FROM Customer__c WHERE Name=:id']]></salesforce:salesforce-query>
+			<salesforce:salesforce-query ><![CDATA[SELECT CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
+FROM Customer__c WHERE CustomerId__c=:id]]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.customerId as String]]]></salesforce:parameters>
 		</salesforce:query>
-		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="7c52f81f-faab-466c-8eb6-c7bd6cc87e47" config-ref="validationConfig" value="#[payload.Name]" message='#["Get customer returned empty!"]'>
+		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="7c52f81f-faab-466c-8eb6-c7bd6cc87e47" config-ref="validationConfig" value="#[payload[0].CustomerId__c]" message='#["Get customer returned empty!"]'>
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
 		</validation:is-not-null>
 		<ee:transform doc:name="Transform to JSON Object" doc:id="499c4c17-9a61-45bc-818b-32a5d08918a7">
@@ -94,7 +95,7 @@ import * from dw::core::Strings
 output application/json	
 ---
 {(payload map () -> {
-	customerId: $.Name,
+	customerId: $.CustomerId__c as Number {format: "0"} as String,
 	firstName: capitalize($.First_Name__c),
 	lastName: capitalize($.Last_Name__c),
 	phoneNumber: $.Phone_Number__c,
@@ -124,7 +125,7 @@ output application/json
 		<salesforce:query doc:name="Get Customer to check if it exists" doc:id="0bd906e7-d692-4cb2-a889-add22619247d" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
 			<reconnect />
-			<salesforce:salesforce-query><![CDATA[SELECT Id,Name,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,
+			<salesforce:salesforce-query><![CDATA[SELECT Id,CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,
 	   Address__c FROM Customer__c WHERE (First_Name__c=':firstName' 
 	   AND Last_Name__c=':lastName') OR (Email__c=':email') OR 
 	   (Phone_Number__c=':phoneNumber')]]></salesforce:salesforce-query>
@@ -135,21 +136,17 @@ output application/json
 	phoneNumber: message.payload.phoneNumber,
 }]]]></salesforce:parameters>
 		</salesforce:query>
-		<logger level="INFO" doc:name="Logger" doc:id="af683e84-e372-46e6-bdbf-4656887a1bea" message="#[%dw 2.0
-output application/json
----
-payload]"/>
 		<choice doc:name="Choice" doc:id="cf499e02-b6f3-4b96-89de-29cdc47020a6">
-			<when expression="#[payload.Name != null]">
+			<when expression="#[payload[0].CustomerId__c != null]">
 				<foreach doc:name="For Each" doc:id="2e65c179-3a2e-42fa-91a7-537940e9158f" >
 					<choice doc:name="Choice" doc:id="68a6792a-4d89-45c2-8724-bd3c2d95d1d4">
-					<when expression="#[(upper(payload.First_Name__c as String) == upper(vars.check.firstName) and upper(payload.Last_Name__c as String) == upper(vars.check.lastName)) and upper(payload.Email__c as String) == upper(vars.check.email) and upper(payload.Phone_Number__c as String) == upper(vars.check.phoneNumber)]">
-						<ee:transform doc:name="Transform to JSON Object" doc:id="67d50957-fadf-4988-93c8-469ce0e15e32">
+					<when expression="#[(vars.checkResult == null) and (upper(payload.First_Name__c as String) == upper(vars.check.firstName) and upper(payload.Last_Name__c as String) == upper(vars.check.lastName)) and upper(payload.Email__c as String) == upper(vars.check.email) and upper(payload.Phone_Number__c as String) == upper(vars.check.phoneNumber)]">
+						<ee:transform doc:name="Return salesforceId from match" doc:id="67d50957-fadf-4988-93c8-469ce0e15e32">
 							<ee:message>
 							</ee:message>
 							<ee:variables>
 								<ee:set-variable variableName="outboundHeaders"><![CDATA[{
-	"Location": "/customer/" ++ payload.Name as String
+	"Location": "/customer/" ++ payload.CustomerId__c as String
 }]]></ee:set-variable>
 									<ee:set-variable variableName="checkResult" ><![CDATA[%dw 2.0
 output application/json
@@ -160,21 +157,21 @@ output application/json
 							</ee:variables>
 						</ee:transform>
 					</when>
-						<when expression="#[vars.checkResult == null and (upper(payload.First_Name__c as String) == upper(vars.check.firstName) and upper(payload.Last_Name__c as String) == upper(vars.check.lastName)) and upper(payload.Email__c as String) != upper(vars.check.email) and upper(payload.Phone_Number__c as String) != upper(vars.check.phoneNumber)]">
-							<set-variable value='#["Create"]' doc:name="checkResult" doc:id="01c8c0c8-48d7-4f67-b28f-d11a28dd4c0f" variableName="checkResult"/>
+						<when expression="#[(vars.checkResult == null) and (upper(payload.Email__c as String) == upper(vars.check.email)) or (upper(payload.Phone_Number__c as String) == upper(vars.check.phoneNumber))]">
+							<raise-error doc:name="APP:CHECK" doc:id="f06be736-583d-4ba9-829b-db8d12bc82dd" type='APP:CHECK'/>
 						</when>
+						<otherwise>
+							<set-variable value='#["Create"]' doc:name="customerCreation == Create" doc:id="dfdb6deb-1df1-4eb4-b49a-67e21428f0dd" variableName="customerCreation" />
+						</otherwise>
 				</choice>
 				</foreach>
-				<validation:is-not-null doc:name="Is not null" doc:id="a0c1a13c-320a-45e5-854f-e76df54133eb" config-ref="validationConfig" value="#[vars.checkResult]">
-					<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CHECK" />
-				</validation:is-not-null>
 				<choice doc:name="Choice" doc:id="800e4941-6e58-4145-87d7-2cfd766766b8">
-					<when expression='#[vars.checkResult == "Create"]'>
+					<when expression='#[vars.checkResult == null and vars.customerCreation == "Create"]'>
 						<set-payload value="#[vars.check]" doc:name="Set the original payload back" doc:id="7edabfab-850e-4aaf-beb5-c02164430f7a" />
 						<flow-ref doc:name="createCustomerFlow" doc:id="115518e3-959d-4e8a-8219-5e5a152557ab" name="createCustomerFlow" />
 					</when>
 					<otherwise >
-						<ee:transform doc:name="Transform Message" doc:id="0c40cbaf-ce0c-4761-83b1-32ca4a0e9df0">
+						<ee:transform doc:name="Return salesforceId from match" doc:id="0c40cbaf-ce0c-4761-83b1-32ca4a0e9df0">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -192,38 +189,17 @@ vars.checkResult]]></ee:set-payload>
 		</choice>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d1859106-be35-4ceb-a6ac-422778a1e190" type="APP:CHECK">
-				<logger level="INFO" doc:name="Logger" doc:id="dc24150a-5a14-4d3f-8438-29d65371939c" message="#[%dw 2.0
-output application/json
----
-payload]"/>
-				<ee:transform doc:name="Transform Check Payload to JSON Object" doc:id="642362f7-dea4-4a83-a2df-d6552a2774d2" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{(message.payload map () -> {
-	"Id": $.Id,
-	"Name": $.Name,
-	"First_Name__c": $.First_Name__c,
-	"Last_Name__c": $.Last_Name__c,
-	"Phone_Number__c": $.Phone_Number__c,
-	"Email__c": $.Email__c,
-	"Address__c": $.Address__c
-})}]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-				<logger level="INFO" doc:name="Logger" doc:id="0339c518-81db-4e33-ad0c-73e22ab040e1" message="#[payload]"/>
 				<ee:transform doc:name="Fulfill Error Information and Details" doc:id="14d7eba6-f7ec-400a-b97e-c5e2df454c77">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 import * from dw::core::Strings
 output application/json
 
-var fname__c = upper(payload.First_Name__c)
-var lname__c = upper(payload.Last_Name__c)
-var email__c = upper(payload.Email__c)
-var phoneNumber__c = upper(payload.Phone_Number__c)
-var address__c = upper(payload.Address__c)
+var fname__c = upper(message.payload.First_Name__c)
+var lname__c = upper(message.payload.Last_Name__c)
+var email__c = upper(message.payload.Email__c)
+var phoneNumber__c = upper(message.payload.Phone_Number__c)
+var address__c = upper(message.payload.Address__c)
 var addressJoin = vars.check.address.address1 as String ++ ", " ++ vars.check.address.city as String ++ ", " ++ vars.check.address.zipCode as String ++ ", " ++ vars.check.address.country as String
 
 fun checkName(firstName, lastName)=
@@ -253,15 +229,15 @@ fun checkAddress(address)=
 {
 	"errorMessage": "Conflict",
 	"description": error.description,
-	"details": checkName(vars.check.firstName, vars.check.lastName) ++ checkEmail(vars.check.email) ++ checkPhoneNumber(vars.check.phoneNumber) ++ checkAddress(addressJoin),
+	"details": checkEmail(vars.check.email) ++ checkPhoneNumber(vars.check.phoneNumber),
 	"customerFound": {
-		salesforceId: payload.Id,
-		customerId: payload.Name,
-		firstName: capitalize(payload.First_Name__c),
-		lastName: capitalize(payload.Last_Name__c),
-		phoneNumber: payload.Phone_Number__c, 
-		email: payload.Email__c,
-		address: payload.Address__c
+		salesforceId: message.payload.Id,
+		customerId: message.payload.CustomerId__c,
+		firstName: capitalize(message.payload.First_Name__c),
+		lastName: capitalize(message.payload.Last_Name__c),
+		phoneNumber: message.payload.Phone_Number__c, 
+		email: message.payload.Email__c,
+		address: message.payload.Address__c
 	}
 }]]></ee:set-payload>
 					</ee:message>
@@ -303,12 +279,12 @@ output application/java
 		<salesforce:query doc:name="Return CustomerID" doc:id="9c648674-10c2-430d-a622-df24ec78b325" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
 			<reconnect />
-			<salesforce:salesforce-query><![CDATA[SELECT Id,Name FROM Customer__c WHERE Id =':id']]></salesforce:salesforce-query>
+			<salesforce:salesforce-query><![CDATA[SELECT Id,CustomerId__c FROM Customer__c WHERE Id =':id']]></salesforce:salesforce-query>
 			<salesforce:parameters><![CDATA[#[{(payload.items.id map () -> {
 	id: $
 })}]]]></salesforce:parameters>
 		</salesforce:query>
-		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="e878f7af-30cb-42e6-a9f7-eaf286a1fd7f" value="#[payload.Name]" message='#["CustomerID retrieve attempt not successful!"]'>
+		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="e878f7af-30cb-42e6-a9f7-eaf286a1fd7f" value="#[payload[0].CustomerId__c]" message='#["CustomerID retrieve attempt not successful!"]'>
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
 		</validation:is-not-null>
 		<ee:transform doc:name="Transform to JSON Object" doc:id="0a2af384-85cd-4db4-801f-20a6fd754e1e">
@@ -322,7 +298,7 @@ output application/json
 			</ee:message>
 			<ee:variables >
 				<ee:set-variable variableName="outboundHeaders" ><![CDATA[{
-	"Location": "/customer/" ++ payload[0].Name as String
+	"Location": "/customer/" ++ payload[0].CustomerId__c as String
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
