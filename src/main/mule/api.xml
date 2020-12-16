@@ -39,7 +39,7 @@ output application/json
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
-			<on-error-propagate type="APIKIT:NOT_FOUND, APP:NULL" enableNotifications="true" logException="true">
+			<on-error-propagate type="APIKIT:NOT_FOUND" enableNotifications="true" logException="true">
 				<ee:transform
 					xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
 					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
@@ -142,6 +142,22 @@ output application/json
 					</ee:message>
 					<ee:variables >
 						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="377043bc-2dae-49fa-a0dc-e7e60ca3da75" type="APP:CUSTOMER_NOT_FOUND" >
+				<ee:transform doc:name="Transform Message" doc:id="c97b01f7-28ee-4083-ae16-1da219f4083d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorMessage": "Customer not found!",
+	"description": error.description
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[404]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>

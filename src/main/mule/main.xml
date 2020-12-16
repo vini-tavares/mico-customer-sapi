@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <mule
+	xmlns:error-handler-plugin="http://www.mulesoft.org/schema/mule/error-handler-plugin"
 	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
 	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org/schema/mule/error-handler-plugin/current/mule-error-handler-plugin.xsd">
 
 
 	<flow
@@ -40,7 +41,7 @@ FROM Customer__c WHERE CustomerId__c >= :initial AND CustomerId__c <= :final]]><
 			message='#["Get customer returned empty!"]'>
 			<error-mapping
 				sourceType="VALIDATION:NULL"
-				targetType="APP:NULL" />
+				targetType="APP:CUSTOMER_NOT_FOUND" />
 		</validation:is-not-null>
 		<ee:transform
 			doc:name="Transform to JSON Array"
@@ -86,7 +87,7 @@ FROM Customer__c WHERE CustomerId__c=:id]]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.customerId as String]]]></salesforce:parameters>
 		</salesforce:query>
 		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="7c52f81f-faab-466c-8eb6-c7bd6cc87e47" config-ref="validationConfig" value="#[payload[0].CustomerId__c]" message='#["Get customer returned empty!"]'>
-			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CUSTOMER_NOT_FOUND" />
 		</validation:is-not-null>
 		<ee:transform doc:name="Transform to JSON Object" doc:id="499c4c17-9a61-45bc-818b-32a5d08918a7">
 			<ee:message>
@@ -271,7 +272,7 @@ output application/java
 			<reconnect />
 		</salesforce:create>
 		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="159cd2a5-e773-4a69-a8f2-d4efc445069d" config-ref="validationConfig" value="#[payload.items.id]" message='#["Customer not created!"]' >
-			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:SERVER" />
 		</validation:is-not-null>
 		<flow-ref doc:name="returnCustomerIdFlow" doc:id="ce9a6c63-e9aa-4bf8-bfb7-cc87d843bec5" name="returnCustomerIdFlow" />
 	</sub-flow>
@@ -285,7 +286,7 @@ output application/java
 })}]]]></salesforce:parameters>
 		</salesforce:query>
 		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="e878f7af-30cb-42e6-a9f7-eaf286a1fd7f" value="#[payload[0].CustomerId__c]" message='#["CustomerID retrieve attempt not successful!"]'>
-			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:NULL" />
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:SERVER" />
 		</validation:is-not-null>
 		<ee:transform doc:name="Transform to JSON Object" doc:id="0a2af384-85cd-4db4-801f-20a6fd754e1e">
 			<ee:message>
