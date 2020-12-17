@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+
+
+
+	<munit:config name="mico-customer-sapi-health-flows-suite.xml" />
+
+
+
+	<munit:test
+		name="get:\alive-200-test"
+		description="Verifying functionality of [get:\alive:mico-customer-sapi-config-200-application\json]">
+		<munit:enable-flow-sources>
+			<munit:enable-flow-source value="mico-customer-sapi-main" />
+			<munit:enable-flow-source value="get:\alive:mico-customer-sapi-config" />
+		</munit:enable-flow-sources>
+		<munit:execution>
+			<http:request
+				config-ref="httpRequestConfiguration"
+				method="GET"
+				path="/alive">
+				<http:headers>#[{"Accept":"application/json"}]</http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that
+				expression="#[attributes.statusCode]"
+				is="#[MunitTools::equalTo(200)]"
+				message="The HTTP Status code is not correct!"
+				doc:name="Assert That Status Code is 200" />
+			<munit-tools:assert-that
+				expression="#[%dw 2.0
+output application/json 
+--- 
+payload]"
+				is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_alive_application_json.json', 'application/json'))]"
+				message="The response payload is not correct!"
+				doc:name="Assert That - Payload is Expected" />
+		</munit:validation>
+	</munit:test>
+
+
+
+	<munit:test
+		name="get:\ready-200-test"
+		description="Verifying functionality of [get:\ready:mico-customer-sapi-config-200-application\json]">
+		<munit:enable-flow-sources>
+			<munit:enable-flow-source value="mico-customer-sapi-main" />
+			<munit:enable-flow-source value="get:\ready:mico-customer-sapi-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock when"
+				doc:id="10677e3b-5b83-4697-9736-50538f13d2d4"
+				processor="salesforce:query">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="Query for testing conn with SF"
+						attributeName="doc:name" />
+					<munit-tools:with-attribute
+						whereValue="01228ca2-27a7-45a4-b5a3-38ff4ca766b3"
+						attributeName="doc:id" />
+					<munit-tools:with-attribute
+						whereValue="salesforceConfig"
+						attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload
+						value='#[[{"Name":1}]]'
+						mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<http:request
+				config-ref="httpRequestConfiguration"
+				method="GET"
+				path="/ready">
+				<http:headers>#[{"Accept":"application/json"}]</http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that
+				expression="#[attributes.statusCode]"
+				is="#[MunitTools::equalTo(200)]"
+				message="The HTTP Status code is not correct!"
+				doc:name="Assert That Status Code is 200" />
+			<munit-tools:assert-that
+				expression="#[%dw 2.0
+output application/json 
+--- 
+payload]"
+				is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_ready_application_json.json', 'application/json'))]"
+				message="The response payload is not correct!"
+				doc:name="Assert That - Payload is Expected" />
+		</munit:validation>
+	</munit:test>
+
+
+
+	<munit:test
+		name="get:\ready-500-test"
+		description="Verifying functionality of [post:\ready:application\json:mico-customer-sapi-config-500-application\json]">
+		<munit:enable-flow-sources>
+			<munit:enable-flow-source value="mico-customer-sapi-main" />
+			<munit:enable-flow-source value="get:\ready:mico-customer-sapi-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock when"
+				doc:id="d9eefd18-3a6d-4727-99a2-5e3086d452c0"
+				processor="salesforce:query">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="Query for testing conn with SF"
+						attributeName="doc:name" />
+					<munit-tools:with-attribute
+						whereValue="01228ca2-27a7-45a4-b5a3-38ff4ca766b3"
+						attributeName="doc:id" />
+					<munit-tools:with-attribute
+						whereValue="salesforceConfig"
+						attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="#['SALESFORCE:INVALID_INPUT']" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<http:request
+				method="GET"
+				doc:name="Request"
+				doc:id="90809782-0039-4fb0-9789-c0bcc893251d"
+				config-ref="httpRequestConfiguration"
+				path="/ready">
+				<http:headers><![CDATA[#[{"Accept":"application/json"}]]]></http:headers>
+				<http:response-validator>
+					<http:success-status-code-validator values="500" />
+				</http:response-validator>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call
+				doc:name="Verify call"
+				doc:id="248c9b03-575f-4c95-a52e-70f2d7ed26ca"
+				processor="salesforce:query"
+				times="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="Query for testing conn with SF"
+						attributeName="doc:name" />
+					<munit-tools:with-attribute
+						whereValue="01228ca2-27a7-45a4-b5a3-38ff4ca766b3"
+						attributeName="doc:id" />
+					<munit-tools:with-attribute
+						whereValue="salesforceConfig"
+						attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that
+				doc:name="Assert That Status Code is 500"
+				doc:id="1644e61e-6fe4-475e-8603-5f900c141dc9"
+				message="The HTTP Status code is not correct!"
+				expression="#[attributes.statusCode]"
+				is="#[MunitTools::equalTo(500)]" />
+			<munit-tools:assert-that
+				doc:name="Assert That - Payload is Expected"
+				doc:id="2d64f130-0b61-45b5-a0db-6374da5b29ae"
+				message="The response payload is not correct!"
+				expression="#[%dw 2.0
+output application/json
+---
+payload.errorMessage]"
+				is='#[MunitTools::equalTo("API is not READY!")]' />
+		</munit:validation>
+	</munit:test>
+
+
+
+</mule>

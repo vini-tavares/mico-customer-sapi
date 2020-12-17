@@ -27,23 +27,29 @@ type CustomerRequestBodyExample = {|
 ]]></types:shape>
     </types:type>
     <types:type name="CustomerResponseBodyExample" format="json">
-      <types:shape format="weave" example="examples/CustomerResponseBodyExample.json"><![CDATA[%dw 2.0
+      <types:shape format="weave" example="examples/CustomerResponseBodyExample-1.json"><![CDATA[%dw 2.0
 
-type CustomerResponseBodyExample = Array<{|  customerId: Number {"typeId": "int"},   firstName: String,   lastName: String,   phoneNumber: String,   email: String,   address: String|}> {"example": "[{\\\"customerId\\\":1,\\\"firstName\\\":\\\"John\\\",\\\"lastName\\\":\\\"Doe\\\",\\\"phoneNumber\\\":\\\"123-123-1234\\\",\\\"email\\\":\\\"john.doe@gmail.com\\\",\\\"address\\\":\\\"1234 Main Street, San Jose, 12345, US\\\"}]"}
+type CustomerResponseBodyExample = Array<{|  salesforceId: String,   customerId: Number {"typeId": "int"},   firstName: String,   lastName: String,   phoneNumber: String,   email: String,   address: {|    address1: String,     city: String,     zipCode: Number {"typeId": "int"},     country: String  |}|}> {"example": "[{\\\"salesforceId\\\":\\\"a004W00000dYSWBQA4\\\",\\\"customerId\\\":1,\\\"firstName\\\":\\\"John\\\",\\\"lastName\\\":\\\"Doe\\\",\\\"phoneNumber\\\":\\\"123-123-1234\\\",\\\"email\\\":\\\"john.doe@gmail.com\\\",\\\"address\\\":{\\\"address1\\\":\\\"1234 Main Street\\\",\\\"city\\\":\\\"San Jose\\\",\\\"zipCode\\\":12345,\\\"country\\\":\\\"US\\\"}}]"}
 
 ]]></types:shape>
     </types:type>
     <types:type name="CustomerByIDResponseBodyExample" format="json">
-      <types:shape format="weave" example="examples/CustomerByIDResponseBodyExample.json"><![CDATA[%dw 2.0
+      <types:shape format="weave" example="examples/CustomerByIDResponseBodyExample-1.json"><![CDATA[%dw 2.0
 
 type CustomerByIDResponseBodyExample = {|
+  salesforceId: String, 
   customerId: Number {"typeId": "int"}, 
   firstName: String, 
   lastName: String, 
   phoneNumber: String, 
   email: String, 
-  address: String
-|} {"example": "{\\\"customerId\\\":1,\\\"firstName\\\":\\\"John\\\",\\\"lastName\\\":\\\"Doe\\\",\\\"phoneNumber\\\":\\\"123-123-1234\\\",\\\"email\\\":\\\"john.doe@gmail.com\\\",\\\"address\\\":\\\"1234 Main Street, San Jose, 12345, US\\\"}"}
+  address: {|
+    address1: String, 
+    city: String, 
+    zipCode: Number {"typeId": "int"}, 
+    country: String
+  |}
+|} {"example": "{\\\"salesforceId\\\":\\\"a004W00000dYSWBQA4\\\",\\\"customerId\\\":1,\\\"firstName\\\":\\\"John\\\",\\\"lastName\\\":\\\"Doe\\\",\\\"phoneNumber\\\":\\\"123-123-1234\\\",\\\"email\\\":\\\"john.doe@gmail.com\\\",\\\"address\\\":{\\\"address1\\\":\\\"1234 Main Street\\\",\\\"city\\\":\\\"San Jose\\\",\\\"zipCode\\\":12345,\\\"country\\\":\\\"US\\\"}}"}
 
 ]]></types:shape>
     </types:type>

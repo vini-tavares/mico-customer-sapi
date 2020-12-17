@@ -52,6 +52,7 @@ import * from dw::core::Strings
 output application/json
 ---
 payload orderBy($.CustomerId__c) map () -> {
+	salesforceId: $.Id,
 	customerId: $.CustomerId__c as Number {format: "0"} as String,
 	firstName: capitalize($.First_Name__c),
 	lastName: capitalize($.Last_Name__c),
@@ -66,25 +67,17 @@ payload orderBy($.CustomerId__c) map () -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger
-			level="INFO"
-			doc:name="Payload"
-			doc:id="67dfdced-64af-4af9-aad6-ae43e4eccd84"
-			message="#[payload]" />
 	
 	
 	
 </flow>
 	<flow name="getCustomerByIdFlow" doc:id="f667b106-dc9e-4775-9d15-52d33c5a0eee" >
-		<validation:is-number numberType="INTEGER" doc:name="Check if uriParam is number" doc:id="a606e4da-fcc6-42b1-803c-0952382ef764" config-ref="validationConfig" value="#[message.attributes.uriParams.customerId]" message='#["uriParam is not number!"]'>
-			<error-mapping sourceType="VALIDATION:INVALID_NUMBER" targetType="APP:URIPARAM" />
-		</validation:is-number>
 		<salesforce:query doc:name="Get Customer By Id" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
 			<reconnect />
 			<salesforce:salesforce-query ><![CDATA[SELECT CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
-FROM Customer__c WHERE CustomerId__c=:id]]></salesforce:salesforce-query>
-			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.customerId as String]]]></salesforce:parameters>
+FROM Customer__c WHERE Id=':id']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.salesforceId as String]]]></salesforce:parameters>
 		</salesforce:query>
 		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="7c52f81f-faab-466c-8eb6-c7bd6cc87e47" config-ref="validationConfig" value="#[payload[0].CustomerId__c]" message='#["Get customer returned empty!"]'>
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CUSTOMER_NOT_FOUND" />
@@ -96,6 +89,7 @@ import * from dw::core::Strings
 output application/json	
 ---
 {(payload map () -> {
+	salesforceId: $.Id,
 	customerId: $.CustomerId__c as Number {format: "0"} as String,
 	firstName: capitalize($.First_Name__c),
 	lastName: capitalize($.Last_Name__c),
@@ -110,7 +104,6 @@ output application/json
 })}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Payload" doc:id="8043b23d-6246-4f4a-a38b-63faf9e66636" message="#[payload]" />
 	</flow>
 	
 	
@@ -159,7 +152,7 @@ output application/json
 						</ee:transform>
 					</when>
 						<when expression="#[(vars.checkResult == null) and (upper(payload.Email__c as String) == upper(vars.check.email)) or (upper(payload.Phone_Number__c as String) == upper(vars.check.phoneNumber))]">
-							<raise-error doc:name="APP:CHECK" doc:id="f06be736-583d-4ba9-829b-db8d12bc82dd" type='APP:CHECK'/>
+							<raise-error doc:name="APP:CHECK" doc:id="f06be736-583d-4ba9-829b-db8d12bc82dd" type='APP:CHECK' description="Customer data already exists on Salesforce!"/>
 						</when>
 						<otherwise>
 							<set-variable value='#["Create"]' doc:name="customerCreation == Create" doc:id="dfdb6deb-1df1-4eb4-b49a-67e21428f0dd" variableName="customerCreation" />
@@ -303,7 +296,6 @@ output application/json
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Payload" doc:id="6d7e70c8-afea-4eb6-88e6-f0302d9fe844" message="#[payload]"/>
 	</sub-flow>
 
 </mule>
