@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <mule
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
 	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
 	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
 	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
@@ -16,7 +17,8 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
-http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
 
 	<http:listener-config name="apiHttpListenerConfig">
 		<http:listener-connection
@@ -80,9 +82,11 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 			port="${http.port}" />
 	</http:request-config>
 
-	<global-property
-		doc:name="Global Property"
-		doc:id="56fc3225-03bd-4cda-8799-37e1709e809d"
-		name="encrypt.key"
-		value="secure12345" />
+	<api-gateway:autodiscovery
+		apiId="${api.id}"
+		ignoreBasePath="true"
+		doc:name="apiAutodiscovery"
+		doc:id="aa4dcb43-41be-4c47-9c5c-315075e7979a"
+		flowRef="mico-customer-sapi-main" />
+		
 </mule>
