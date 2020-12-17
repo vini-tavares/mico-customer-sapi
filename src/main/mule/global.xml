@@ -27,7 +27,8 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 	<apikit:config
 		name="mico-customer-sapi-config"
 		outboundHeadersMapName="outboundHeaders"
-		httpStatusVarName="httpStatus" api="${api.spec}"/>
+		httpStatusVarName="httpStatus"
+		api="${api.spec}" />
 
 	<salesforce:sfdc-config
 		name="salesforceConfig"
@@ -56,7 +57,7 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 		doc:name="Secure Properties Config"
 		doc:id="7a0250ac-ee40-4340-8a20-6fec1bf9de38"
 		file="properties-${env}-secure.yaml"
-		key="${encrypt.key}" >
+		key="${encrypt.key}">
 		<secure-properties:encrypt algorithm="Blowfish" />
 	</secure-properties:config>
 
@@ -78,6 +79,10 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 			host="${http.host}"
 			port="${http.port}" />
 	</http:request-config>
-	<global-property doc:name="Global Property" doc:id="56fc3225-03bd-4cda-8799-37e1709e809d" name="encrypt.key" value="secure12345" />
-	
+
+	<global-property
+		doc:name="Global Property"
+		doc:id="56fc3225-03bd-4cda-8799-37e1709e809d"
+		name="encrypt.key"
+		value="secure12345" />
 </mule>

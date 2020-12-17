@@ -10,7 +10,7 @@
 
 
 
-	<munit:config name="mico-customer-sapi-apikit-test.xml" />
+	<munit:config name="mico-customer-sapi-main-flows-suite.xml" />
 
 
 
@@ -21,10 +21,10 @@
 			<munit:enable-flow-source value="mico-customer-sapi-main" />
 			<munit:enable-flow-source value="get:\customers:mico-customer-sapi-config" />
 		</munit:enable-flow-sources>
-		<munit:behavior>
+		<munit:behavior >
 			<munit-tools:mock-when
 				doc:name="Mock when"
-				doc:id="60ffad91-4bec-4e3c-af97-8b271d6f5d66"
+				doc:id="d095a618-0fcf-47ec-8cfd-0944c6f79b68"
 				processor="salesforce:query">
 				<munit-tools:with-attributes>
 					<munit-tools:with-attribute

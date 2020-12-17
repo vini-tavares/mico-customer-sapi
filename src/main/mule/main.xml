@@ -23,7 +23,7 @@ http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org
 			config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
 			<reconnect />
-			<salesforce:salesforce-query><![CDATA[SELECT CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
+			<salesforce:salesforce-query><![CDATA[SELECT Id,CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
 FROM Customer__c WHERE CustomerId__c >= :initial AND CustomerId__c <= :final]]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[output application/json
 ---
@@ -75,7 +75,7 @@ payload orderBy($.CustomerId__c) map () -> {
 		<salesforce:query doc:name="Get Customer By Id" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SERVER" />
 			<reconnect />
-			<salesforce:salesforce-query ><![CDATA[SELECT CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
+			<salesforce:salesforce-query ><![CDATA[SELECT Id,CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
 FROM Customer__c WHERE Id=':id']]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.salesforceId as String]]]></salesforce:parameters>
 		</salesforce:query>
