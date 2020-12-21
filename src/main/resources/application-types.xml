@@ -148,4 +148,5 @@ type CustomerPostResponseBodyExample = {|
     </types:processor-declaration>
   </types:enrichment>
   <types:enrichment select="#67d50957-fadf-4988-93c8-469ce0e15e32"/>
+  <types:enrichment select="#0c40cbaf-ce0c-4761-83b1-32ca4a0e9df0"/>
 </types:mule>

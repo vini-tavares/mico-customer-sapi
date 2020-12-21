@@ -139,14 +139,14 @@ output application/json
 							<ee:message>
 							</ee:message>
 							<ee:variables>
-								<ee:set-variable variableName="outboundHeaders"><![CDATA[{
-	"Location": "/customer/" ++ payload.CustomerId__c as String
-}]]></ee:set-variable>
 									<ee:set-variable variableName="checkResult" ><![CDATA[%dw 2.0
 output application/json
 ---
 {
 	"salesforceId": payload.Id
+}]]></ee:set-variable>
+									<ee:set-variable variableName="outboundHeaders" ><![CDATA[{
+	"location": "/customers/" ++ payload.Id as String
 }]]></ee:set-variable>
 							</ee:variables>
 						</ee:transform>
@@ -172,6 +172,8 @@ output application/json
 ---
 vars.checkResult]]></ee:set-payload>
 					</ee:message>
+							<ee:variables >
+							</ee:variables>
 				</ee:transform>
 					</otherwise>
 				</choice>
@@ -292,7 +294,7 @@ output application/json
 			</ee:message>
 			<ee:variables >
 				<ee:set-variable variableName="outboundHeaders" ><![CDATA[{
-	"Location": "/customer/" ++ payload[0].CustomerId__c as String
+	"location": "/customers/" ++ payload[0].Id as String
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>

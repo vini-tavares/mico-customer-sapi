@@ -20,7 +20,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 output application/json
 ---
 {
-	"errorMessage": "Bad request",
+	"errorMessage": "Bad request!",
 	"description": error.description
 }]]></ee:set-payload>
                     </ee:message>

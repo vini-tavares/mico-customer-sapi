@@ -21,15 +21,10 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 output application/json
 ---
 {
-  status: "ALIVE"
+  "status": "ALIVE"
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger
-			level="INFO"
-			doc:name="Payload"
-			doc:id="6e831f02-cff6-41c3-8137-a9e73682897d"
-			message="#[payload]" />
 	</flow>
 
 
@@ -51,15 +46,10 @@ output application/json
 output application/json
 ---
 {
-  status: "READY"
+  "status": "READY"
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger
-			level="INFO"
-			doc:name="Payload"
-			doc:id="b4bde98b-c37b-428a-b717-748ebdeff258"
-			message="#[payload]" />
 		<error-handler>
 			<on-error-propagate
 				enableNotifications="true"
