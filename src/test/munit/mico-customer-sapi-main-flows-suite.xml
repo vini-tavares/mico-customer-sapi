@@ -596,7 +596,7 @@ payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/pos
 			<munit-tools:assert-that doc:name="Assert That - Location Header is Expected" doc:id="82f8b916-6b5b-405d-a5c9-45903c3b7384" message="The response payload is not correct!" expression="#[%dw 2.0
 output application/json 
 --- 
-message.attributes.headers.location]" is='#[MunitTools::equalTo("/customers/a004W00000dYJdDQAW")]' />
+message.attributes.headers.Location]" is='#[MunitTools::equalTo("/customers/a004W00000dYJdDQAW")]' />
 		</munit:validation>
 	</munit:test>
 	
