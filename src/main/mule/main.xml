@@ -24,12 +24,12 @@ http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org
 			<error-mapping targetType="APP:SALESFORCE_INTERNAL_SERVER_ERROR" />
 			<reconnect />
 			<salesforce:salesforce-query><![CDATA[SELECT Id,CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
-FROM Customer__c WHERE First_Name__c= :'firstName' AND Last_Name__c= :'lastName']]></salesforce:salesforce-query>
+FROM Customer__c WHERE First_Name__c= ':firstName' AND Last_Name__c= ':lastName']]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[output application/json
 ---
 {
-	"firstName": message.attributes.uriParams.'firstName',
-	"lastName": message.attributes.uriParams.'lastName'
+	"firstName": message.attributes.queryParams.'firstName',
+	"lastName": message.attributes.queryParams.'lastName'
 }]]]></salesforce:parameters>
 		
 </salesforce:query>
