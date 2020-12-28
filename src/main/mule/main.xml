@@ -15,21 +15,21 @@ http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org
 
 
 	<flow
-		name="getCustomerFlow"
+		name="getCustomersFlow"
 		doc:id="6f327fe6-b84d-4550-86f1-9f13ef969528">
 		<salesforce:query
 			doc:name="Get Customers"
 			doc:id="3eac1571-9059-4f98-bc3e-e319d2d08444"
 			config-ref="salesforceConfig">
-			<error-mapping targetType="APP:SERVER" />
+			<error-mapping targetType="APP:SALESFORCE_INTERNAL_SERVER_ERROR" />
 			<reconnect />
 			<salesforce:salesforce-query><![CDATA[SELECT Id,CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
-FROM Customer__c WHERE CustomerId__c >= :initial AND CustomerId__c <= :final]]></salesforce:salesforce-query>
+FROM Customer__c WHERE First_Name__c= :'firstName' AND Last_Name__c= :'lastName']]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[output application/json
 ---
 {
-	"initial": attributes.queryParams.'initialId' as Number,
-	"final": attributes.queryParams.'finalId' as Number
+	"firstName": message.attributes.uriParams.'firstName',
+	"lastName": message.attributes.uriParams.'lastName'
 }]]]></salesforce:parameters>
 		
 </salesforce:query>
@@ -73,7 +73,7 @@ payload orderBy($.CustomerId__c) map () -> {
 </flow>
 	<flow name="getCustomerByIdFlow" doc:id="f667b106-dc9e-4775-9d15-52d33c5a0eee" >
 		<salesforce:query doc:name="Get Customer By Id" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
-			<error-mapping targetType="APP:SERVER" />
+			<error-mapping targetType="APP:SALESFORCE_INTERNAL_SERVER_ERROR" />
 			<reconnect />
 			<salesforce:salesforce-query ><![CDATA[SELECT Id,CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
 FROM Customer__c WHERE Id=':id']]></salesforce:salesforce-query>
@@ -104,153 +104,14 @@ output application/json
 })}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-	</flow>
-	
-	
-	
-	<flow name="postCustomerFlow" doc:id="ce36b4e6-f17c-4717-a15a-86afd1848abf">
-		<set-variable value="#[message.payload]" doc:name="Save the original payload to vars.check" doc:id="57e0af50-3183-4416-b36a-2ac23c168fed" variableName="check" />
-		<flow-ref doc:name="checkIfCustomerExistsFlow" doc:id="f565d138-6a89-422a-a26f-ba4d52c122dc" name="checkIfCustomerExistsFlow"/>
-	</flow>
-	
-	
-	
-	<flow name="checkIfCustomerExistsFlow" doc:id="a4ca9353-44e2-4ebb-a22b-e7f5dca98d22" >
-		<salesforce:query doc:name="Get Customer to check if it exists" doc:id="0bd906e7-d692-4cb2-a889-add22619247d" config-ref="salesforceConfig">
-			<error-mapping targetType="APP:SERVER" />
-			<reconnect />
-			<salesforce:salesforce-query><![CDATA[SELECT Id,CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,
-	   Address__c FROM Customer__c WHERE (First_Name__c=':firstName' 
-	   AND Last_Name__c=':lastName') OR (Email__c=':email') OR 
-	   (Phone_Number__c=':phoneNumber')]]></salesforce:salesforce-query>
-			<salesforce:parameters><![CDATA[#[{
-	firstName: message.payload.firstName,
-	lastName: message.payload.lastName,
-	email: message.payload.email,
-	phoneNumber: message.payload.phoneNumber,
-}]]]></salesforce:parameters>
-		</salesforce:query>
-		<choice doc:name="Choice" doc:id="cf499e02-b6f3-4b96-89de-29cdc47020a6">
-			<when expression="#[payload[0].CustomerId__c != null]">
-				<foreach doc:name="For Each" doc:id="2e65c179-3a2e-42fa-91a7-537940e9158f" >
-					<choice doc:name="Choice" doc:id="68a6792a-4d89-45c2-8724-bd3c2d95d1d4">
-					<when expression="#[(vars.checkResult == null) and (upper(payload.First_Name__c as String) == upper(vars.check.firstName) and upper(payload.Last_Name__c as String) == upper(vars.check.lastName)) and upper(payload.Email__c as String) == upper(vars.check.email) and upper(payload.Phone_Number__c as String) == upper(vars.check.phoneNumber)]">
-						<ee:transform doc:name="Return salesforceId from match" doc:id="67d50957-fadf-4988-93c8-469ce0e15e32">
-							<ee:message>
-							</ee:message>
-							<ee:variables>
-									<ee:set-variable variableName="checkResult" ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"salesforceId": payload.Id
-}]]></ee:set-variable>
-									<ee:set-variable variableName="outboundHeaders" ><![CDATA[{
-	"Location": "/customers/" ++ payload.Id as String
-}]]></ee:set-variable>
-							</ee:variables>
-						</ee:transform>
-					</when>
-						<when expression="#[(vars.checkResult == null) and (upper(payload.Email__c as String) == upper(vars.check.email)) or (upper(payload.Phone_Number__c as String) == upper(vars.check.phoneNumber))]">
-							<raise-error doc:name="APP:CHECK" doc:id="f06be736-583d-4ba9-829b-db8d12bc82dd" type='APP:CHECK' description="Customer data already exists on Salesforce!"/>
-						</when>
-						<otherwise>
-							<set-variable value='#["Create"]' doc:name="customerCreation == Create" doc:id="dfdb6deb-1df1-4eb4-b49a-67e21428f0dd" variableName="customerCreation" />
-						</otherwise>
-				</choice>
-				</foreach>
-				<choice doc:name="Choice" doc:id="800e4941-6e58-4145-87d7-2cfd766766b8">
-					<when expression='#[vars.checkResult == null and vars.customerCreation == "Create"]'>
-						<set-payload value="#[vars.check]" doc:name="Set the original payload back" doc:id="7edabfab-850e-4aaf-beb5-c02164430f7a" />
-						<flow-ref doc:name="createCustomerFlow" doc:id="115518e3-959d-4e8a-8219-5e5a152557ab" name="createCustomerFlow" />
-					</when>
-					<otherwise >
-						<ee:transform doc:name="Return salesforceId from match" doc:id="0c40cbaf-ce0c-4761-83b1-32ca4a0e9df0">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-vars.checkResult]]></ee:set-payload>
-					</ee:message>
-							<ee:variables >
-							</ee:variables>
-				</ee:transform>
-					</otherwise>
-				</choice>
-			</when>
-			<otherwise>
-				<set-payload value="#[vars.check]" doc:name="Set the original payload back" doc:id="1ce7cd54-13ee-483c-b78b-344c4842b3d4" />
-				<flow-ref doc:name="createCustomerFlow" doc:id="9fd928a1-4cac-42c3-8db1-febdf6d2610e" name="createCustomerFlow"/>
-			</otherwise>
-		</choice>
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d1859106-be35-4ceb-a6ac-422778a1e190" type="APP:CHECK">
-				<ee:transform doc:name="Fulfill Error Information and Details" doc:id="14d7eba6-f7ec-400a-b97e-c5e2df454c77">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::core::Strings
-output application/json
-
-var fname__c = upper(message.payload.First_Name__c)
-var lname__c = upper(message.payload.Last_Name__c)
-var email__c = upper(message.payload.Email__c)
-var phoneNumber__c = upper(message.payload.Phone_Number__c)
-var address__c = upper(message.payload.Address__c)
-var addressJoin = vars.check.address.address1 as String ++ ", " ++ vars.check.address.city as String ++ ", " ++ vars.check.address.zipCode as String ++ ", " ++ vars.check.address.country as String
-
-fun checkName(firstName, lastName)=
-	if(fname__c == upper(firstName) and lname__c == upper(lastName))
-		"Customer data 'firstName': '" ++ (firstName as String) ++ "' already on Salesforce! " ++ "Customer data 'lastName': '" ++ (lastName as String) ++ "' already on Salesforce! "
-	else
-		""
-
-fun checkEmail(email)=
-	if(email__c == upper(email))
-		"Customer data 'email:' '" ++ (email as String) ++ "' already on Salesforce! "
-	else
-		""
-
-fun checkPhoneNumber(phoneNumber)=
-	if(phoneNumber__c == upper(phoneNumber))
-		"Customer data 'phoneNumber': '" ++ (phoneNumber as String) ++ "' already on Salesforce! "
-	else
-		""
-		
-fun checkAddress(address)=
-	if(address__c == upper(address))
-		"Customer data 'address': '" ++ (address as String) ++ "' already on Salesforce!"
-	else
-		""
----
-{
-	"errorMessage": "Conflict",
-	"description": error.description,
-	"details": checkEmail(vars.check.email) ++ checkPhoneNumber(vars.check.phoneNumber),
-	"customerFound": {
-		salesforceId: message.payload.Id,
-		customerId: message.payload.CustomerId__c,
-		firstName: capitalize(message.payload.First_Name__c),
-		lastName: capitalize(message.payload.Last_Name__c),
-		phoneNumber: message.payload.Phone_Number__c, 
-		email: message.payload.Email__c,
-		address: message.payload.Address__c
-	}
-}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[409]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-		</error-handler>
 	</flow>	
 	
 	
 	
-	<sub-flow name="createCustomerFlow" doc:id="7fa5524d-e404-4e8f-9d33-1bb62a1e4021" >
-		<ee:transform doc:name="Transform to JAVA Array" doc:id="2234c0df-5f73-4228-a0af-1e7e10ffca15" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+	<flow name="postCustomersFlow" doc:id="bd4d9711-953e-4932-921b-1b4bd2bdd6e2" >
+		<ee:transform doc:name="Transform to JAVA Array" doc:id="2234c0df-5f73-4228-a0af-1e7e10ffca15">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/java
 ---
 [{
@@ -262,42 +123,40 @@ output application/java
 }]]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<salesforce:create type="Customer__c" doc:name="Create new record" doc:id="244165fe-074e-49ec-a0eb-e4f536f40847" config-ref="salesforceConfig" >
+		<salesforce:create type="Customer__c" doc:name="Create new record" doc:id="244165fe-074e-49ec-a0eb-e4f536f40847" config-ref="salesforceConfig" target="creationResult">
 			<error-mapping targetType="APP:SERVER" />
 			<reconnect />
 		</salesforce:create>
-		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="159cd2a5-e773-4a69-a8f2-d4efc445069d" config-ref="validationConfig" value="#[payload.items.id]" message='#["Customer not created!"]' >
-			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:SERVER" />
-		</validation:is-not-null>
-		<flow-ref doc:name="returnCustomerIdFlow" doc:id="ce9a6c63-e9aa-4bf8-bfb7-cc87d843bec5" name="returnCustomerIdFlow" />
-	</sub-flow>
-	<sub-flow name="returnCustomerIdFlow" doc:id="5c307103-9380-4ca4-83f8-a756e93fc4b7">
-		<salesforce:query doc:name="Return CustomerID" doc:id="9c648674-10c2-430d-a622-df24ec78b325" config-ref="salesforceConfig">
-			<error-mapping targetType="APP:SERVER" />
-			<reconnect />
-			<salesforce:salesforce-query><![CDATA[SELECT Id,CustomerId__c FROM Customer__c WHERE Id =':id']]></salesforce:salesforce-query>
-			<salesforce:parameters><![CDATA[#[{(payload.items.id map () -> {
-	id: $
-})}]]]></salesforce:parameters>
-		</salesforce:query>
-		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="e878f7af-30cb-42e6-a9f7-eaf286a1fd7f" value="#[payload[0].CustomerId__c]" message='#["CustomerID retrieve attempt not successful!"]'>
-			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:SERVER" />
+		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="159cd2a5-e773-4a69-a8f2-d4efc445069d" config-ref="validationConfig" value="#[vars.creationResult.items[0].id]" message='#["Customer not created!"]'>
+			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:SALESFORCE_QUERY" />
 		</validation:is-not-null>
 		<ee:transform doc:name="Transform to JSON Object" doc:id="0a2af384-85cd-4db4-801f-20a6fd754e1e">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{(payload map () -> {
-	"salesforceId": $.Id
-})}]]></ee:set-payload>
+{
+	"salesforceId": vars.creationResult.items[0].id
+}]]></ee:set-payload>
 			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="outboundHeaders" ><![CDATA[{
-	"Location": "/customers/" ++ payload[0].Id as String
+			<ee:variables>
+				<ee:set-variable variableName="outboundHeaders"><![CDATA[{
+	"Location": "/customers/" ++ vars.creationResult.items[0].id as String
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-	</sub-flow>
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7d64b494-ef40-4778-9e52-3381ff683a81" type="APP:SALESFORCE_QUERY">
+				<choice doc:name="Choice" doc:id="d8499b33-dbe9-4fd2-8e37-35f2cdb32eee" >
+					<when expression='#[vars.creationResult.items[0].statusCode == "DUPLICATES_DETECTED"]'>
+						<raise-error doc:name="APP:SALESFORCE_CONFLICT" doc:id="257b9793-5969-483d-81cd-b09dbe0fccab" type="APP:SALESFORCE_CONFLICT" description="#[vars.creationResult.items[0].message]"/>
+					</when>
+					<otherwise >
+						<raise-error doc:name="APP:SALESFORCE_INTERNAL_SERVER_ERROR" doc:id="40cb2dcf-e509-42f8-8596-1bcdc8d5fe9a" type="APP:SALESFORCE_INTERNAL_SERVER_ERROR" description="#[error.description]"/>
+					</otherwise>
+				</choice>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
 
 </mule>

@@ -31,13 +31,9 @@ output application/json
 	<flow
 		name="healthReadyFlow"
 		doc:id="20c9505a-9edd-47cf-a468-5be67b72e9eb">
-		<salesforce:query
-			doc:name="Query for testing conn with SF"
-			doc:id="01228ca2-27a7-45a4-b5a3-38ff4ca766b3"
-			config-ref="salesforceConfig">
+		<salesforce:get-user-info doc:name="Get user info" doc:id="440cee74-3def-4240-b1ac-a1316e26edc5" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:READY" />
-			<salesforce:salesforce-query><![CDATA[SELECT Name FROM Customer__c LIMIT 5]]></salesforce:salesforce-query>
-		</salesforce:query>
+		</salesforce:get-user-info>
 		<ee:transform
 			doc:name="Ready"
 			doc:id="7ea6b102-71eb-4288-98fd-3d579b07e0b4">

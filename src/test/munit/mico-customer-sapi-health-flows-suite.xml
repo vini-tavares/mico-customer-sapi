@@ -21,7 +21,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 
 	<munit:test
 		name="get:\alive-200-test"
-		description="Verifying functionality of [get:\alive:mico-customer-sapi-config-200-application\json]">
+		description="Verifying functionality of [get:\alive:mico-customer-sapi-config-200-application\json]" ignore="true">
 		<munit:enable-flow-sources>
 			<munit:enable-flow-source value="mico-customer-sapi-main" />
 			<munit:enable-flow-source value="get:\alive:mico-customer-sapi-config" />
@@ -55,7 +55,7 @@ payload]"
 
 	<munit:test
 		name="get:\ready-200-test"
-		description="Verifying functionality of [get:\ready:mico-customer-sapi-config-200-application\json]">
+		description="Verifying functionality of [get:\ready:mico-customer-sapi-config-200-application\json]" ignore="true">
 		<munit:enable-flow-sources>
 			<munit:enable-flow-source value="mico-customer-sapi-main" />
 			<munit:enable-flow-source value="get:\ready:mico-customer-sapi-config" />
@@ -112,7 +112,7 @@ payload]"
 
 	<munit:test
 		name="get:\ready-500-test"
-		description="Verifying functionality of [post:\ready:application\json:mico-customer-sapi-config-500-application\json]">
+		description="Verifying functionality of [post:\ready:application\json:mico-customer-sapi-config-500-application\json]" ignore="true">
 		<munit:enable-flow-sources>
 			<munit:enable-flow-source value="mico-customer-sapi-main" />
 			<munit:enable-flow-source value="get:\ready:mico-customer-sapi-config" />
