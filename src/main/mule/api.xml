@@ -6,8 +6,7 @@
 	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
 
 
 
@@ -140,11 +139,11 @@ output application/json
 				enableNotifications="true"
 				logException="true"
 				doc:name="On Error Propagate"
-				doc:id="d52c2819-8cac-47af-9247-05540c3d7d2b"
+				doc:id="ac3dcb34-bf98-41e7-a0be-a3e16168b470"
 				type="APP:CUSTOMER_NOT_FOUND">
 				<ee:transform
 					doc:name="Transform Message"
-					doc:id="51935f04-7bda-44eb-8653-6b3162428c2b">
+					doc:id="1ef60fb6-3f44-4c85-816a-d02a8cccabb3">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -163,11 +162,11 @@ output application/json
 				enableNotifications="true"
 				logException="true"
 				doc:name="On Error Propagate"
-				doc:id="7ca48895-bb05-48c9-8e64-8205f8422245"
+				doc:id="91099f38-e4ae-49ec-b36f-7d4c528bb705"
 				type="APP:SALESFORCE_INTERNAL_SERVER_ERROR">
 				<ee:transform
 					doc:name="Transform Message"
-					doc:id="c0a14566-fb55-44ae-9d7f-0c4a8a75d694">
+					doc:id="073748b6-31d0-48dd-aa98-a41e5ef789ed">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -186,11 +185,13 @@ output application/json
 				enableNotifications="true"
 				logException="true"
 				doc:name="On Error Propagate"
-				doc:id="b4ffa01f-2a30-4312-8f6a-9189272a7ad8"
+				doc:id="62742171-70bf-4035-9207-ea3bb613af69"
 				type="APP:SALESFORCE_CONFLICT">
-				<ee:transform doc:name="Transform Message" doc:id="5859aea4-5f1b-449e-b592-1c38a69d4d2a" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+				<ee:transform
+					doc:name="Transform Message"
+					doc:id="91751770-363f-4824-84ec-cb1de8cdf775">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -198,8 +199,8 @@ output application/json
 	"description": error.description
 }]]></ee:set-payload>
 					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[409]]></ee:set-variable>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[409]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
@@ -230,13 +231,10 @@ output application/json
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{
-	"errorMessage": "Resource not found",
-	"description": error.description
-}]]></ee:set-payload>
+{message: "Resource not found"}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatus">404</ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
@@ -246,48 +244,33 @@ output application/json
 
 
 	<flow name="get:\alive:mico-customer-sapi-config">
-		<flow-ref
-			doc:name="healthAliveFlow"
-			doc:id="d6f63a5c-974f-4481-ac0a-a10ffdd643a5"
-			name="healthAliveFlow" />
+		<flow-ref doc:name="healthAliveFlow" doc:id="a4779bf9-7eff-4445-ac33-255a3b68c45b" name="healthAliveFlow"/>
 	</flow>
 
 
 
 	<flow name="get:\customers:mico-customer-sapi-config">
-		<flow-ref
-			doc:name="getCustomersFlow"
-			doc:id="17f5f294-e968-491a-9d68-22e8441ee57b"
-			name="getCustomersFlow" />
+		<flow-ref doc:name="getCustomersFlow" doc:id="e117946e-5cf0-4c5e-94aa-5274d5e99348" name="getCustomersFlow"/>
 	</flow>
-
-
-
+	
+	
+	
 	<flow name="get:\ready:mico-customer-sapi-config">
-		<flow-ref
-			doc:name="healthReadyFlow"
-			doc:id="9042bad7-e4fa-4a04-be87-971f5c402bab"
-			name="healthReadyFlow" />
+		<flow-ref doc:name="healthReadyFlow" doc:id="aba6b9d9-452a-430b-ba97-ecee831dbcc6" name="healthReadyFlow"/>
 	</flow>
-
-
-
-	<flow name="get:\customers\(salesforceId):mico-customer-sapi-config">
-		<flow-ref
-			doc:name="getCustomerByIdFlow"
-			doc:id="e3097ba8-0c27-4980-8cb9-0b64de5db3d1"
-			name="getCustomerByIdFlow" />
+	
+	
+	
+	<flow name="get:\customers\(email):mico-customer-sapi-config">
+		<flow-ref doc:name="getCustomerByEmailFlow" doc:id="495bce41-0c4b-4cd0-87da-7e7347205ecf" name="getCustomerByEmailFlow"/>
 	</flow>
-
-
-
+	
+	
+	
 	<flow name="post:\customers:application\json:mico-customer-sapi-config">
-		<flow-ref
-			doc:name="postCustomersFlow"
-			doc:id="00f70a62-61ed-48ea-9026-5610475be9c2"
-			name="postCustomersFlow" />
+		<flow-ref doc:name="postCustomersFlow" doc:id="e0e5e740-4198-404e-8cbd-92e8d307b666" name="postCustomersFlow"/>
 	</flow>
-
-
-
+	
+	
+	
 </mule>

@@ -247,11 +247,11 @@ payload.errorMessage]"
 
 
 	<munit:test
-		name="get:\customers\(salesforceId)-200-test"
+		name="get:\customers\(email)-200-test"
 		description="Verifying functionality of [get:\customers\(customerId):mico-customer-sapi-config-200-application\json]" ignore="true">
 		<munit:enable-flow-sources>
 			<munit:enable-flow-source value="mico-customer-sapi-main" />
-			<munit:enable-flow-source value="get:\customers\(salesforceId):mico-customer-sapi-config" />
+			<munit:enable-flow-source value="get:\customers\(email):mico-customer-sapi-config" />
 		</munit:enable-flow-sources>
 		<munit:behavior>
 			<set-variable
@@ -308,11 +308,11 @@ payload]"
 
 
 	<munit:test 
-		name="get:\customers\(salesforceId)-404-test" 
+		name="get:\customers\(email)-404-test" 
 		description="Verifying functionality of [get:\customers\(customerId):mico-customer-sapi-config-404-application\json]" ignore="true">
 		<munit:enable-flow-sources>
 			<munit:enable-flow-source value="mico-customer-sapi-main" />
-			<munit:enable-flow-source value="get:\customers\(salesforceId):mico-customer-sapi-config" />
+			<munit:enable-flow-source value="get:\customers\(email):mico-customer-sapi-config" />
 		</munit:enable-flow-sources>
 		<munit:behavior>
 			<set-variable
@@ -373,11 +373,11 @@ payload]"
 
 
 	<munit:test 
-		name="get:\customers\(salesforceId)-400-test" 
+		name="get:\customers\(email)-400-test" 
 		description="Verifying functionality of [get:\customers\(customerId):mico-customer-sapi-config-400-application\json]" ignore="true">
 		<munit:enable-flow-sources>
 			<munit:enable-flow-source value="mico-customer-sapi-main" />
-			<munit:enable-flow-source value="get:\customers\(salesforceId):mico-customer-sapi-config" />
+			<munit:enable-flow-source value="get:\customers\(email):mico-customer-sapi-config" />
 		</munit:enable-flow-sources>
 		<munit:behavior>
 			<set-variable value="#['1']" doc:name="salesforceId" doc:id="339885d0-34a4-485c-8a63-30e88422ac1a" variableName="salesforceId" />
@@ -424,11 +424,11 @@ payload.errorMessage]"
 
 
 	<munit:test 
-		name="get:\customers\(salesforceId)-500-test" 
+		name="get:\customers\(email)-500-test" 
 		description="Verifying functionality of [get:\customers\(customerId):mico-customer-sapi-config-500-application\json]" ignore="true">
 		<munit:enable-flow-sources>
 			<munit:enable-flow-source value="mico-customer-sapi-main" />
-			<munit:enable-flow-source value="get:\customers\(salesforceId):mico-customer-sapi-config" />
+			<munit:enable-flow-source value="get:\customers\(email):mico-customer-sapi-config" />
 		</munit:enable-flow-sources>
 		<munit:behavior>
 			<set-variable

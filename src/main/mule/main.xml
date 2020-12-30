@@ -71,13 +71,13 @@ payload orderBy($.CustomerId__c) map () -> {
 	
 	
 </flow>
-	<flow name="getCustomerByIdFlow" doc:id="f667b106-dc9e-4775-9d15-52d33c5a0eee" >
-		<salesforce:query doc:name="Get Customer By Id" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
+	<flow name="getCustomerByEmailFlow" doc:id="f667b106-dc9e-4775-9d15-52d33c5a0eee" >
+		<salesforce:query doc:name="Get Customer By Email" doc:id="80be653d-e8a1-4838-b4ce-deebc10f1cd0" config-ref="salesforceConfig">
 			<error-mapping targetType="APP:SALESFORCE_INTERNAL_SERVER_ERROR" />
 			<reconnect />
 			<salesforce:salesforce-query ><![CDATA[SELECT Id,CustomerId__c,First_Name__c,Last_Name__c,Phone_Number__c,Email__c,Address__c 
-FROM Customer__c WHERE Id=':id']]></salesforce:salesforce-query>
-			<salesforce:parameters ><![CDATA[#[id: message.attributes.uriParams.salesforceId as String]]]></salesforce:parameters>
+FROM Customer__c WHERE Email__c=':email']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[email: message.attributes.uriParams.'email' as String]]]></salesforce:parameters>
 		</salesforce:query>
 		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="7c52f81f-faab-466c-8eb6-c7bd6cc87e47" config-ref="validationConfig" value="#[payload[0].CustomerId__c]" message='#["Get customer returned empty!"]'>
 			<error-mapping sourceType="VALIDATION:NULL" targetType="APP:CUSTOMER_NOT_FOUND" />
