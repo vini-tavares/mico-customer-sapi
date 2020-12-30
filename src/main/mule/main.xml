@@ -124,7 +124,7 @@ output application/java
 			</ee:message>
 		</ee:transform>
 		<salesforce:create type="Customer__c" doc:name="Create new record" doc:id="244165fe-074e-49ec-a0eb-e4f536f40847" config-ref="salesforceConfig" target="creationResult">
-			<error-mapping targetType="APP:SERVER" />
+			<error-mapping targetType="APP:SALESFORCE_INTERNAL_SERVER_ERROR" />
 			<reconnect />
 		</salesforce:create>
 		<validation:is-not-null doc:name="Check if returned payload is not null" doc:id="159cd2a5-e773-4a69-a8f2-d4efc445069d" config-ref="validationConfig" value="#[vars.creationResult.items[0].id]" message='#["Customer not created!"]'>
@@ -141,7 +141,7 @@ output application/json
 			</ee:message>
 			<ee:variables>
 				<ee:set-variable variableName="outboundHeaders"><![CDATA[{
-	"Location": "/customers/" ++ vars.creationResult.items[0].id as String
+	"Location": "/customers/" ++ message.payload[0].'Email__c' as String
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
