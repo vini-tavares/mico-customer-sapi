@@ -88,6 +88,5 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
 		doc:name="apiAutodiscovery"
 		doc:id="aa4dcb43-41be-4c47-9c5c-315075e7979a"
 		flowRef="mico-customer-sapi-main" />
-	<global-property doc:name="Global Property" doc:id="3d03cd8a-2d40-4e26-b8c2-b540e3c7e13c" name="encrypt.key" value="secure12345" />
 		
 </mule>

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.mycompany</groupId>
@@ -13,7 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<app.runtime>4.3.0-20201013</app.runtime>
+		<app.runtime>4.3.0</app.runtime>
 		<app.runtime.semver>${app.runtime}</app.runtime.semver>
 		<mule.maven.plugin.version>3.3.5</mule.maven.plugin.version>
 		
@@ -62,6 +65,26 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
+					<cloudHubDeployment>
+						<server>cloudhub</server>
+						<businessGroupId>cd8b296d-8848-4a91-98ed-4a47f73703bd</businessGroupId>
+						<environment>Sandbox</environment>
+						<region>us-east-2</region>
+						<muleVersion>${app.runtime.semver}</muleVersion>
+						<workers>1</workers>
+						<workerType>MICRO</workerType>
+						<objectStoreV2>true</objectStoreV2>
+						<applicationName>mico-customer-sapi-dev</applicationName>
+						<deploymentTimeout>1600000</deploymentTimeout>
+						<properties>
+							<anypoint.platform.client_id>${ap.client_id}</anypoint.platform.client_id>
+							<anypoint.platform.client_secret>${ap.client_secret}</anypoint.platform.client_secret>
+							<encrypt.key>${encrypt.key}</encrypt.key>
+							<anypoint.platform.config.analytics.agent.enabled>true</anypoint.platform.config.analytics.agent.enabled>
+							<anypoint.platform.visualizer.displayName>${project.artifactId}</anypoint.platform.visualizer.displayName>
+							<anypoint.platform.visualizer.layer>SAPI</anypoint.platform.visualizer.layer>
+						</properties>
+					</cloudHubDeployment>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -93,12 +116,12 @@
 	<dependencies>
 		<!-- Mico Customer SAPI -->
 		<dependency>
-            <groupId>${api.groupId}</groupId>
-            <artifactId>${api.artifactId}</artifactId>
-            <version>${api.version}</version>
-            <classifier>raml</classifier>
-            <type>zip</type>
-        </dependency>
+			<groupId>${api.groupId}</groupId>
+			<artifactId>${api.artifactId}</artifactId>
+			<version>${api.version}</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
+		</dependency>
 		<dependency>
 			<groupId>org.mule.modules</groupId>
 			<artifactId>mule-apikit-module</artifactId>
@@ -123,32 +146,33 @@
 			<version>1.2.3</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
-    	<dependency>
-            <groupId>com.mulesoft.munit</groupId>
-            <artifactId>munit-runner</artifactId>
-            <version>2.3.1</version>
-            <classifier>mule-plugin</classifier>
-            <scope>test</scope>
-        </dependency>	<dependency>
-            <groupId>com.mulesoft.munit</groupId>
-            <artifactId>munit-tools</artifactId>
-            <version>${munit.version}</version>
-            <classifier>mule-plugin</classifier>
-            <scope>test</scope>
-        </dependency>
-    	<dependency>
-            <groupId>com.mulesoft.connectors</groupId>
-            <artifactId>mule-salesforce-connector</artifactId>
-            <version>10.7.0</version>
-            <classifier>mule-plugin</classifier>
-        </dependency>
-    	<dependency>
-            <groupId>cd8b296d-8848-4a91-98ed-4a47f73703bd</groupId>
-            <artifactId>common-error-handler</artifactId>
-            <version>3.0.1</version>
-            <classifier>mule-plugin</classifier>
-        </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-runner</artifactId>
+			<version>2.3.1</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-tools</artifactId>
+			<version>${munit.version}</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.connectors</groupId>
+			<artifactId>mule-salesforce-connector</artifactId>
+			<version>10.7.0</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>cd8b296d-8848-4a91-98ed-4a47f73703bd</groupId>
+			<artifactId>common-error-handler</artifactId>
+			<version>3.0.1</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+	</dependencies>
 
 	<repositories>
 		<repository>
