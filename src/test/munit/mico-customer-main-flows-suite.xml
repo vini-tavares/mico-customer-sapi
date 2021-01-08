@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+
+
+
+	<munit:config name="main-suite.xml" />
+
+
+
+	<munit:test
+		name="getCustomersFlow-test-200"
+		doc:id="518e3d77-efbe-4502-ae5f-e5a4d4ad4365">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get Customers" doc:id="b7cb6d6e-9074-41d9-913c-98ef7d211e8d" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3eac1571-9059-4f98-bc3e-e319d2d08444" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[%dw 2.0
+output application/java
+---
+[{
+	"Id": "a004W00000dYSWBQA4",
+	"CustomerId__c": 1,
+	"First_Name__c": "John",
+	"Last_Name__c": "Doe",
+	"Phone_Number__c": "123-123-1234",
+	"Email__c": "john.doe@gmail.com",
+	"Address__c": "1234 Main Street, San Jose, 12345, US"
+}]
+]' mediaType="application/java" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy Transform to JSON Array" doc:id="a21bca17-1197-4389-a8d9-25bb47ac1cdd" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3e8dda58-9019-4794-a554-340e72d741a7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert-that doc:name="Payload is correct" doc:id="0bf650a2-8aa8-436b-8787-2141482a9da7" is='#[MunitTools::equalTo(
+	[{
+	"Id": "a004W00000dYSWBQA4",
+	"CustomerId__c": 1,
+	"First_Name__c": "John",
+	"Last_Name__c": "Doe",
+	"Phone_Number__c": "123-123-1234",
+	"Email__c": "john.doe@gmail.com",
+	"Address__c": "1234 Main Street, San Jose, 12345, US"
+}]
+)]' expression="#[%dw 2.0
+output application/json
+---
+payload]" message="Payload is not correct!"/>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert-that doc:name="Payload is correct" doc:id="8b4d4d38-2782-4881-bab9-5d86b3809ec1" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_customer_application_json.json', 'application/json'))]" expression="#[%dw 2.0
+output application/json
+---
+payload]" message="The response payload is not correct!"/>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getCustomersFlow" doc:id="8b8124e3-8f54-48fe-a77a-418339ad7d91" name="getCustomersFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify Check if returned payload is not null" doc:id="6f95e5f0-0cb5-46d5-a3d0-b99e68614873" processor="validation:is-not-null" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="af0ffcc2-11d0-440a-a671-edab8c1ca41f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Transform to JSON Array" doc:id="a542c47e-5a64-48d0-8cf2-8ce7a63275d3" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3e8dda58-9019-4794-a554-340e72d741a7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Payload is correct" doc:id="83a71b13-0a22-4b14-b02d-d4b86681be14" message="The response payload is not correct!" expression="#[%dw 2.0
+output application/json
+---
+payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_customer_application_json.json', 'application/json'))]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="getCustomerByEmailFlow-test-200" doc:id="e10aef95-150c-40cb-9a55-e593b0188d89" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get Customer By Email" doc:id="dedee4f6-39d3-45fd-9ebf-74ebd5e8f060" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="80be653d-e8a1-4838-b4ce-deebc10f1cd0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[%dw 2.0
+output application/java
+---
+[{
+	"Id": "a004W00000dYSWBQA4",
+	"CustomerId__c": 1,
+	"First_Name__c": "John",
+	"Last_Name__c": "Doe",
+	"Phone_Number__c": "123-123-1234",
+	"Email__c": "john.doe@gmail.com",
+	"Address__c": "1234 Main Street, San Jose, 12345, US"
+}]
+]' mediaType="application/java" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy Transform to JSON Object" doc:id="bd1f11fa-2a24-41f1-881a-be279d562e8d" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="499c4c17-9a61-45bc-818b-32a5d08918a7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert-that doc:name="Payload is correct" doc:id="2b3af61d-ea3c-48c0-ab1b-d2c88ad920e0" message="Payload is not correct!" is='#[MunitTools::equalTo(
+	[{
+	"Id": "a004W00000dYSWBQA4",
+	"CustomerId__c": 1,
+	"First_Name__c": "John",
+	"Last_Name__c": "Doe",
+	"Phone_Number__c": "123-123-1234",
+	"Email__c": "john.doe@gmail.com",
+	"Address__c": "1234 Main Street, San Jose, 12345, US"
+}]
+)]' expression="#[%dw 2.0
+output application/json
+---
+payload]" />
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert-that doc:name="Payload is correct" doc:id="b933f8d3-7e18-46d8-bb1b-d9eeb5598470" message="The response payload is not correct!" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_customer_{email}_application_json.json', 'application/json'))]" expression="#[%dw 2.0
+output application/json
+---
+payload]" />
+				</munit-tools:after-call>
+			</munit-tools:spy>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getCustomerByEmailFlow" doc:id="4bf01ded-832b-4620-91e6-fd217a2d6e60" name="getCustomerByEmailFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify Check if returned payload is not null" doc:id="20f638c2-aff9-4aa8-9959-d326585f13cf" processor="validation:is-not-null" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7c52f81f-faab-466c-8eb6-c7bd6cc87e47" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Transform to JSON Object" doc:id="9357fc9c-7b44-42f6-a7f8-80459641b0eb" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="499c4c17-9a61-45bc-818b-32a5d08918a7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Payload is correct" doc:id="63375511-24c7-48e5-aa9c-306eaed05ee2" message="The response payload is not correct!" expression="#[%dw 2.0
+output application/json
+---
+payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_customer_{email}_application_json.json', 'application/json'))]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="postCustomersFlow-test" doc:id="f1e15d02-c76d-42b0-a243-45dd6e96398f" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Create new record" doc:id="80303df4-1834-4a2c-a7e7-b421d263d340" processor="salesforce:create">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="244165fe-074e-49ec-a0eb-e4f536f40847" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="creationResult" value='#[%dw 2.0 output application/java --- {"id": null, "items": [{"exception": null, "message": null, "payload": {"success": true, "id": "a004W00000dYSWBQA4", "errors": [ ]}, "id": "a004W00000dYSWBQA4", "successful": true, "statusCode": null }], "successful": true}]' mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy Transform to JAVA Array" doc:id="8e5e44b8-1078-4c2f-b0b9-4de08990749d" processor="ee:transform">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="2234c0df-5f73-4228-a0af-1e7e10ffca15" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call>
+					<munit-tools:assert-that doc:name="Payload is JSON Object" doc:id="8a6865c4-bdce-4f39-9045-2d0448e84bbf" expression="#[%dw 2.0
+output application/json
+---
+payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/request/post_customer_application_json.json', 'application/json'))]" message="Payload is not correct!" />
+				</munit-tools:before-call>
+				<munit-tools:after-call>
+					<munit-tools:assert-that doc:name="Payload is JAVA Array" doc:id="8ba37182-25de-4724-96e5-3b053d02d900" expression="#[%dw 2.0
+output application/json
+---
+payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/request/post_customer_application_java.json', 'application/json'))]" message="Payload is not correct!" />
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit-tools:spy doc:name="Spy Transform to JSON Object" doc:id="41fabad3-b7cd-47ff-831d-686cec1518a2" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0a2af384-85cd-4db4-801f-20a6fd754e1e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert-that doc:name="Payload is JSON Object" doc:id="905f005f-621d-41eb-ad22-861b342aee84" message="Payload is not correct!" expression="#[%dw 2.0
+output application/json
+---
+payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/request/post_customer_application_java.json', 'application/json'))]" />
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert-that doc:name="Payload is JSON Object" doc:id="008a875d-dd62-4492-92a7-b5f5156668d3" message="Payload is not correct!" expression="#[%dw 2.0
+output application/json
+---
+payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/post_201_customer_application_json.json', 'application/json'))]" />
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit:set-event doc:name="Set Input" doc:id="df8f4c23-e3e7-4f62-b425-ca992d0160d6">
+				<munit:payload value='#[output application/json ---
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "phoneNumber": "123-123-1234",
+  "email": "john.doe@gmail.com",
+  "address": {
+    "address1": "1234 Main Street",
+    "city": "San Jose",
+    "zipCode": 12345,
+    "country": "US"
+  }
+}
+]' encoding="UTF-8" mediaType="application/json" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to postCustomersFlow" doc:id="0f48da20-04e5-4f2e-b824-c56c3a89ddc5" name="postCustomersFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify Transform to JAVA Array" doc:id="8dbf81ca-bf3d-4569-9e84-fce1a00f0eed" processor="ee:transform" times="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="2234c0df-5f73-4228-a0af-1e7e10ffca15" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Check if returned payload is not null" doc:id="56eb80f3-db7b-4569-b002-4856b63b5552" processor="validation:is-not-null" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="159cd2a5-e773-4a69-a8f2-d4efc445069d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Transform to JSON Object" doc:id="73f83ebd-287c-48a3-894b-33e6e3321dbf" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0a2af384-85cd-4db4-801f-20a6fd754e1e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	
+
+</mule>

@@ -32,6 +32,7 @@ http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org
 				doc:name="On Error Propagate"
 				doc:id="ac3dcb34-bf98-41e7-a0be-a3e16168b470"
 				type="APP:CUSTOMER_NOT_FOUND">
+				<logger level="INFO" doc:name="Logger" doc:id="8a06dc6b-a3da-422e-9273-da7655a0ca17" message="#[%dw 2.0 output application/json --- error]"/>
 				<ee:transform doc:name="Transform Message" doc:id="b68d7e81-c1dc-47a1-90b8-3ed48313f956" >
 					<ee:message />
 					<ee:variables >
@@ -79,6 +80,25 @@ error.muleMessage.typedValue.errorDetails default []]]></ee:set-variable>
 				</ee:transform>
 				<set-variable value="409" doc:name="Set httpStatus" doc:id="0c64b89d-6e70-4eb6-b829-30f20a6192e6" variableName="httpStatus" />
 				<error-handler-plugin:on-error doc:id="f68c8950-90cf-4091-873a-e90d2a04b0a1" notFoundError="Order not found" errorTypes="APP:SALESFORCE_CONFLICT" errorCodes="#[vars.httpStatus]" errorMessages='#[error.detailedDescription default " " replace "," with " "]' doc:name="Process Error" />
+			</on-error-propagate>
+			<on-error-propagate
+				enableNotifications="true"
+				logException="true"
+				doc:name="On Error Propagate"
+				doc:id="50f60a0e-de17-47d5-ae5d-45c8b9d1da9c"
+				type="APP:READY">
+				<ee:transform doc:name="Transform Message" doc:id="555fcf06-e42e-445e-a6b6-31ba7deea92c">
+					<ee:message />
+					<ee:variables>
+						<ee:set-variable variableName="errorDetails"><![CDATA[%dw 2.0
+output application/java
+---
+error.muleMessage.typedValue.errorDetails default []]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<set-variable value="500" doc:name="Set httpStatus" doc:id="1f661d01-842a-4857-91a3-36c03a56749c" variableName="httpStatus" />
+				<error-handler-plugin:on-error doc:id="25fb02ed-78c1-40cc-8a5a-1aef3350a204" notFoundError="Order not found" errorTypes="APP:READY" errorCodes="#[vars.httpStatus]" errorMessages='#[error.detailedDescription default " " replace "," with " "]' doc:name="Process Error" />
+				<logger level="ERROR" doc:name="Logger" doc:id="4c4e75bf-6fc5-4610-835b-bfbc76ff9259" message="#[%dw 2.0 output application/json --- payload]" />
 			</on-error-propagate>
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="35694d3c-b6ed-4f4a-8355-abce667334a3" type="ANY">
 				<ee:transform doc:name="Transform Message" doc:id="46e33300-0848-48b1-a96b-9018c5547e4f" >

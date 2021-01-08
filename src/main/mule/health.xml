@@ -51,24 +51,9 @@ output application/json
 				enableNotifications="true"
 				logException="true"
 				doc:name="On Error Propagate"
-				doc:id="afe064b5-feb6-4034-a352-be3902675842"
-				type="APP:READY">
-				<ee:transform
-					doc:name="Transform Message"
-					doc:id="7c66d411-142f-4d6b-bb1f-048ad14423fe">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	"errorMessage": "API is not READY!",
-	"description": error.description
-}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[500]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
+				doc:id="afe064b5-feb6-4034-a352-be3902675842" type="APP:READY">
+				<raise-error doc:name="Raise error" doc:id="1cd1042e-0a61-4d13-9327-199c278692da" type="APP:READY" description="API is not READY"/>
+
 			</on-error-propagate>
 		</error-handler>
 	</flow>
