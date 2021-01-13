@@ -3,8 +3,8 @@ pipeline {
     
     options {
     	timestamps()
-    	ansiColor("xterm")
-    }
+    	ansiColor('xterm')  
+  }
     
     environment {
     	AP_CLIENT_ID = credentials('ap.client_id')
