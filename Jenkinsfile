@@ -10,12 +10,12 @@ pipeline {
     stages {
         stage('Build') {
         	steps {
-                bat 'mvn clean install -Dencrypt.key=$ENCRYPT_KEY'
+                bat 'mvn clean install -Dencrypt.key=${ENCRYPT_KEY}'
             }
         }
         stage('Deploy to CloudHub') {
         	steps {
-                bat 'mvn package deploy -DmuleDeploy -Dap.client_id=$AP_CLIENT_ID -Dap.client_secret=$AP_CLIENT_SECRET -Dencrypt.key=$ENCRYPT_KEY'
+                bat 'mvn package deploy -DmuleDeploy -Dap.client_id=${AP_CLIENT_ID} -Dap.client_secret=${AP_CLIENT_SECRET} -Dencrypt.key=${ENCRYPT_KEY}'
             }
         }
    	}
