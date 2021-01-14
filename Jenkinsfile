@@ -1,17 +1,13 @@
 pipeline {
     agent any
-    
     options {
-    	timestamps()
     	ansiColor('xterm')  
-  }
-    
+  	}
     environment {
     	AP_CLIENT_ID = credentials('ap.client_id')
     	AP_CLIENT_SECRET = credentials('ap.client_secret')
     	ENCRYPT_KEY = credentials('encrypt.key')
     }
-
     stages {
         stage('Build') {
         	steps {
@@ -20,7 +16,7 @@ pipeline {
         }
         stage('Deploy to CloudHub') {
         	steps {
-                bat 'mvn mule:deploy -DmuleDeploy -Dmule.artifact=./target/${api.artifactId}-1.0.0-SNAPSHOT-mule-application.jar -Dap.client_id=${AP_CLIENT_ID} -Dap.client_secret=${AP_CLIENT_SECRET} -Dencrypt.key=${ENCRYPT_KEY}'
+                bat 'mvn mule:deploy -DmuleDeploy -Dmule.artifact=./target/*.jar -Dap.client_id=${AP_CLIENT_ID} -Dap.client_secret=${AP_CLIENT_SECRET} -Dencrypt.key=${ENCRYPT_KEY}'
             }
         }
    	}
