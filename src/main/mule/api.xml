@@ -6,7 +6,8 @@
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org/schema/mule/error-handler-plugin/current/mule-error-handler-plugin.xsd">
 
@@ -30,46 +31,11 @@ http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org
 				enableNotifications="true"
 				logException="true"
 				doc:name="On Error Propagate"
-				doc:id="ac3dcb34-bf98-41e7-a0be-a3e16168b470"
-				type="APP:CUSTOMER_NOT_FOUND">
-				<logger level="INFO" doc:name="Logger" doc:id="8a06dc6b-a3da-422e-9273-da7655a0ca17" message="#[%dw 2.0 output application/json --- error]"/>
-				<ee:transform doc:name="Transform Message" doc:id="b68d7e81-c1dc-47a1-90b8-3ed48313f956" >
-					<ee:message />
-					<ee:variables >
-						<ee:set-variable variableName="errorDetails" ><![CDATA[%dw 2.0
-output application/java
----
-error.muleMessage.typedValue.errorDetails default []]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-				<set-variable value="404" doc:name="set httpStatus" doc:id="89d3d3f0-43f2-4347-b7cf-eb6b5bb1184c" variableName="httpStatus" />
-				<error-handler-plugin:on-error doc:id="88660ad5-978b-48bd-8c03-f58a4ae6fc10" notFoundError="Order not found" errorTypes="APP:CUSTOMER_NOT_FOUND" errorCodes="#[vars.httpStatus]" errorMessages='#[error.detailedDescription default " " replace "," with " "]' doc:name="Process Error" />
-			</on-error-propagate>
-			<on-error-propagate
-				enableNotifications="true"
-				logException="true"
-				doc:name="On Error Propagate"
-				doc:id="91099f38-e4ae-49ec-b36f-7d4c528bb705"
-				type="APP:SALESFORCE_INTERNAL_SERVER_ERROR">
-				<ee:transform doc:name="Transform Message" doc:id="66886651-08df-4dc2-b141-9d9933f2c43d" >
-					<ee:message />
-					<ee:variables >
-						<ee:set-variable variableName="errorDetails" ><![CDATA[%dw 2.0
-output application/java
----
-error.muleMessage.typedValue.errorDetails default []]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-				<set-variable value="500" doc:name="Set httpStatus" doc:id="e31a69b4-61b9-4628-8c2b-8045ebe4b170" variableName="httpStatus" />
-				<error-handler-plugin:on-error doc:id="7d780cd2-c57c-489a-bf29-bc739ed6566c" notFoundError="Order not found" errorTypes="APP:SALESFORCE_INTERNAL_SERVER_ERROR" errorCodes="#[vars.httpStatus]" errorMessages='#[error.detailedDescription default " " replace "," with " "]' doc:name="Process Error" />
-			</on-error-propagate>
-			<on-error-propagate
-				enableNotifications="true"
-				logException="true"
-				doc:name="On Error Propagate"
-				doc:id="62742171-70bf-4035-9207-ea3bb613af69"
-				type="APP:SALESFORCE_CONFLICT">
-				<ee:transform doc:name="Transform Message" doc:id="6607a7cc-a68d-4cee-a4e3-843c90300c42">
+				doc:id="35694d3c-b6ed-4f4a-8355-abce667334a3"
+				type="ANY">
+				<ee:transform
+					doc:name="Transform Message"
+					doc:id="46e33300-0848-48b1-a96b-9018c5547e4f">
 					<ee:message />
 					<ee:variables>
 						<ee:set-variable variableName="errorDetails"><![CDATA[%dw 2.0
@@ -78,39 +44,37 @@ output application/java
 error.muleMessage.typedValue.errorDetails default []]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-				<set-variable value="409" doc:name="Set httpStatus" doc:id="0c64b89d-6e70-4eb6-b829-30f20a6192e6" variableName="httpStatus" />
-				<error-handler-plugin:on-error doc:id="f68c8950-90cf-4091-873a-e90d2a04b0a1" notFoundError="Order not found" errorTypes="APP:SALESFORCE_CONFLICT" errorCodes="#[vars.httpStatus]" errorMessages='#[error.detailedDescription default " " replace "," with " "]' doc:name="Process Error" />
-			</on-error-propagate>
-			<on-error-propagate
-				enableNotifications="true"
-				logException="true"
-				doc:name="On Error Propagate"
-				doc:id="50f60a0e-de17-47d5-ae5d-45c8b9d1da9c"
-				type="APP:READY">
-				<ee:transform doc:name="Transform Message" doc:id="555fcf06-e42e-445e-a6b6-31ba7deea92c">
-					<ee:message />
-					<ee:variables>
-						<ee:set-variable variableName="errorDetails"><![CDATA[%dw 2.0
+				<error-handler-plugin:on-error doc:name="Process Error" doc:id="c727963e-5cce-4def-b819-792653281806" config-ref="Error_Handler_Plugin_Config" badRequestError='#[error.description default "There was an issue with your request message"]' unauthorizedError='#[error.description default "You have issues accessing the system"]' notFoundError='#[error.description default "The API has not been implemented"]' notAcceptableError='#[error.description default "One of the request or parameters is unacceptable"]' timeoutError='#[error.description default "You request to the server has been timed-out"]' unsupportedMediaTypeError='#[error.description default "Media Type not supported"]' tooManyRequestsError='#[error.description default "You have made too many requests to the server"]' serverError='#[error.description default "There is a server issue"]' methodNotAllowedError='#[error.description default "The method has not been implemented"]' connectivityError='#[error.description default "You have issues accessing the system"]'>
+					<error-handler-plugin:custom-errors ><![CDATA[#[%dw 2.0
 output application/java
 ---
-error.muleMessage.typedValue.errorDetails default []]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-				<set-variable value="500" doc:name="Set httpStatus" doc:id="1f661d01-842a-4857-91a3-36c03a56749c" variableName="httpStatus" />
-				<error-handler-plugin:on-error doc:id="25fb02ed-78c1-40cc-8a5a-1aef3350a204" notFoundError="Order not found" errorTypes="APP:READY" errorCodes="#[vars.httpStatus]" errorMessages='#[error.detailedDescription default " " replace "," with " "]' doc:name="Process Error" />
-				<logger level="ERROR" doc:name="Logger" doc:id="4c4e75bf-6fc5-4610-835b-bfbc76ff9259" message="#[%dw 2.0 output application/json --- payload]" />
-			</on-error-propagate>
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="35694d3c-b6ed-4f4a-8355-abce667334a3" type="ANY">
-				<ee:transform doc:name="Transform Message" doc:id="46e33300-0848-48b1-a96b-9018c5547e4f" >
-					<ee:message />
-					<ee:variables >
-						<ee:set-variable variableName="errorDetails" ><![CDATA[%dw 2.0
-output application/java
----
-error.muleMessage.typedValue.errorDetails default []]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-				<error-handler-plugin:on-error doc:name="Process Error" doc:id="5251ce37-41f4-4751-ae16-0f12a5316cf4" badRequestError='#[error.description default "There was an issue with your request message."]' unauthorizedError='#[error.description default "You have issues accessing the system"]' notFoundError='#[error.description default "The API has not been implemented"]' notAcceptableError='#[error.description default "One of the request or parameters is unacceptable"]' timeoutError='#[error.description default "You request to the server has been timed-out"]' unsupportedMediaTypeError='#[error.description default "Media Type not supported"]' tooManyRequestsError='#[error.description default "You have made too many requests to the server"]' serverError='#[error.description default "There is a server issue"]' methodNotAllowedError='#[error.description default "The method has not been implemented"]' connectivityError='#[error.description default "You have issues accessing the system"]' />
+{
+	"APP:CUSTOMER_NOT_FOUND": {
+		"errorCode": 404,
+		"reason": "Test",
+		"defaultError": error.detailedDescription default "",
+		"errorType": "APP:CUSTOMER_NOT_FOUND"
+	},
+	"APP:SALESFORCE_INTERNAL_SERVER_ERROR": {
+		"errorCode": 500,
+		"reason": "UNKNOWN",
+		"defaultError": error.detailedDescription default "",
+		"errorType": "APP:SALESFORCE_INTERNAL_SERVER_ERROR"
+	},
+	"APP:SALESFORCE_CONFLICT": {
+		"errorCode": 409,
+		"reason": "UNKNOWN",
+		"defaultError": error.detailedDescription default "",
+		"errorType": "APP:SALESFORCE_CONFLICT"
+	},
+	"APP:READY": {
+		"errorCode": 500,
+		"reason": "UNKNOWN",
+		"defaultError": error.detailedDescription default "",
+		"errorType": "APP:READY"
+	}
+}]]]></error-handler-plugin:custom-errors>
+				</error-handler-plugin:on-error>
 				<set-variable value="#[payload.errorDetails[0].code as Number]" doc:name="Set httpStatus" doc:id="668caae2-8030-43bc-b1b9-dbbb85299e4d" variableName="httpStatus" />
 			</on-error-propagate>
 		</error-handler>
@@ -153,33 +117,48 @@ output application/json
 
 
 	<flow name="get:\alive:mico-customer-sapi-config">
-		<flow-ref doc:name="healthAliveFlow" doc:id="a4779bf9-7eff-4445-ac33-255a3b68c45b" name="healthAliveFlow"/>
+		<flow-ref
+			doc:name="healthAliveFlow"
+			doc:id="a4779bf9-7eff-4445-ac33-255a3b68c45b"
+			name="healthAliveFlow" />
 	</flow>
 
 
 
 	<flow name="get:\customers:mico-customer-sapi-config">
-		<flow-ref doc:name="getCustomersFlow" doc:id="e117946e-5cf0-4c5e-94aa-5274d5e99348" name="getCustomersFlow"/>
+		<flow-ref
+			doc:name="getCustomersFlow"
+			doc:id="e117946e-5cf0-4c5e-94aa-5274d5e99348"
+			name="getCustomersFlow" />
 	</flow>
-	
-	
-	
+
+
+
 	<flow name="get:\ready:mico-customer-sapi-config">
-		<flow-ref doc:name="healthReadyFlow" doc:id="aba6b9d9-452a-430b-ba97-ecee831dbcc6" name="healthReadyFlow"/>
+		<flow-ref
+			doc:name="healthReadyFlow"
+			doc:id="aba6b9d9-452a-430b-ba97-ecee831dbcc6"
+			name="healthReadyFlow" />
 	</flow>
-	
-	
-	
+
+
+
 	<flow name="get:\customers\(email):mico-customer-sapi-config">
-		<flow-ref doc:name="getCustomerByEmailFlow" doc:id="495bce41-0c4b-4cd0-87da-7e7347205ecf" name="getCustomerByEmailFlow"/>
+		<flow-ref
+			doc:name="getCustomerByEmailFlow"
+			doc:id="495bce41-0c4b-4cd0-87da-7e7347205ecf"
+			name="getCustomerByEmailFlow" />
 	</flow>
-	
-	
-	
+
+
+
 	<flow name="post:\customers:application\json:mico-customer-sapi-config">
-		<flow-ref doc:name="postCustomersFlow" doc:id="e0e5e740-4198-404e-8cbd-92e8d307b666" name="postCustomersFlow"/>
+		<flow-ref
+			doc:name="postCustomersFlow"
+			doc:id="e0e5e740-4198-404e-8cbd-92e8d307b666"
+			name="postCustomersFlow" />
 	</flow>
-	
-	
-	
+
+
+
 </mule>
