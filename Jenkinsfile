@@ -16,8 +16,8 @@ pipeline {
         }
         stage('Deploy to CloudHub') {
         	steps {
-                bat 'mvn mule:deploy -DmuleDeploy -Dmule.artifact=mico-customer-sapi/target/.jar -Dap.client_id=${AP_CLIENT_ID} -Dap.client_secret=${AP_CLIENT_SECRET} -Dencrypt.key=${ENCRYPT_KEY}'
-            }
+                bat 'mvn mule:deploy -DmuleDeploy -Dmule.artifact=~/target/.jar -Dap.client_id=${AP_CLIENT_ID} -Dap.client_secret=${AP_CLIENT_SECRET} -Dencrypt.key=${ENCRYPT_KEY}'
+            }	
         }
    	}
 }    
