@@ -44,14 +44,27 @@ output application/java
 error.muleMessage.typedValue.errorDetails default []]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-				<error-handler-plugin:on-error doc:name="Process Error" doc:id="c727963e-5cce-4def-b819-792653281806" config-ref="Error_Handler_Plugin_Config" badRequestError='#[error.description default "There was an issue with your request message"]' unauthorizedError='#[error.description default "You have issues accessing the system"]' notFoundError='#[error.description default "The API has not been implemented"]' notAcceptableError='#[error.description default "One of the request or parameters is unacceptable"]' timeoutError='#[error.description default "You request to the server has been timed-out"]' unsupportedMediaTypeError='#[error.description default "Media Type not supported"]' tooManyRequestsError='#[error.description default "You have made too many requests to the server"]' serverError='#[error.description default "There is a server issue"]' methodNotAllowedError='#[error.description default "The method has not been implemented"]' connectivityError='#[error.description default "You have issues accessing the system"]'>
-					<error-handler-plugin:custom-errors ><![CDATA[#[%dw 2.0
+				<error-handler-plugin:on-error
+					doc:name="Process Error"
+					doc:id="c727963e-5cce-4def-b819-792653281806"
+					config-ref="Error_Handler_Plugin_Config"
+					badRequestError='#[error.description default "There was an issue with your request message"]'
+					unauthorizedError='#[error.description default "You have issues accessing the system"]'
+					notFoundError='#[error.description default "The API has not been implemented"]'
+					notAcceptableError='#[error.description default "One of the request or parameters is unacceptable"]'
+					timeoutError='#[error.description default "You request to the server has been timed-out"]'
+					unsupportedMediaTypeError='#[error.description default "Media Type not supported"]'
+					tooManyRequestsError='#[error.description default "You have made too many requests to the server"]'
+					serverError='#[error.description default "There is a server issue"]'
+					methodNotAllowedError='#[error.description default "The method has not been implemented"]'
+					connectivityError='#[error.description default "You have issues accessing the system"]'>
+					<error-handler-plugin:custom-errors><![CDATA[#[%dw 2.0
 output application/java
 ---
 {
 	"APP:CUSTOMER_NOT_FOUND": {
 		"errorCode": 404,
-		"reason": "Test",
+		"reason": "UNKNOWN",
 		"defaultError": error.detailedDescription default "",
 		"errorType": "APP:CUSTOMER_NOT_FOUND"
 	},
@@ -75,7 +88,11 @@ output application/java
 	}
 }]]]></error-handler-plugin:custom-errors>
 				</error-handler-plugin:on-error>
-				<set-variable value="#[payload.errorDetails[0].code as Number]" doc:name="Set httpStatus" doc:id="668caae2-8030-43bc-b1b9-dbbb85299e4d" variableName="httpStatus" />
+				<set-variable
+					value="#[attributes.httpStatus]"
+					doc:name="Set httpStatus"
+					doc:id="668caae2-8030-43bc-b1b9-dbbb85299e4d"
+					variableName="httpStatus" />
 			</on-error-propagate>
 		</error-handler>
 	</flow>
